@@ -92,6 +92,11 @@
                     </constraints>
                     <control type="slider" format="integer"/>
                 </setting>
+                <setting id="test_overlay" type="action" label="32019" help="32058">
+                    <level>0</level>
+                    <data>RunScript(service.chapternotify,test_overlay)</data>
+                    <control type="button" format="action"/>
+                </setting>
             </group>
         </category>
         <category id="advanced" label="32004" help="">
