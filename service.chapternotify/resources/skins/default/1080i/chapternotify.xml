@@ -7,9 +7,13 @@
     <animation effect="fade" start="0" end="100" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowOpen</animation>
     <animation effect="fade" start="100" end="0" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowClose</animation>
 
-    <!-- Slide animations -->
-    <animation effect="slide" start="0,80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide)">WindowOpen</animation>
-    <animation effect="slide" start="0,0" end="0,80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide)">WindowClose</animation>
+    <!-- Slide up animations (for bottom positions) -->
+    <animation effect="slide" start="0,80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide_up)">WindowOpen</animation>
+    <animation effect="slide" start="0,0" end="0,80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_up)">WindowClose</animation>
+
+    <!-- Slide down animations (for top positions) -->
+    <animation effect="slide" start="0,-80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide_down)">WindowOpen</animation>
+    <animation effect="slide" start="0,0" end="0,-80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_down)">WindowClose</animation>
 
     <controls>
         <!-- Bottom Center -->

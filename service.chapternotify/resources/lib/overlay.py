@@ -60,15 +60,20 @@ def create_chapter_overlay(parsed_name):
         "1080i",
     )
 
-    overlay.setProperty("position", _get_position_key(position))
+    position_key = _get_position_key(position)
+    overlay.setProperty("position", position_key)
     overlay.setProperty("bgcolor", _get_opacity_hex(opacity))
-    overlay.setProperty("animation", "fade" if animation == 0 else "slide")
+    if animation == 0:
+        overlay.setProperty("animation", "fade")
+    else:
+        is_top = position_key.startswith("top_")
+        overlay.setProperty("animation", "slide_down" if is_top else "slide_up")
 
     if parsed_name["artist"]:
-        overlay.setProperty("artist", "Artist:  " + parsed_name["artist"])
-        overlay.setProperty("track", "Track:   " + parsed_name["track"])
+        overlay.setProperty("artist", "Artist: " + parsed_name["artist"])
+        overlay.setProperty("track", "Track: " + parsed_name["track"])
         overlay.setProperty("label",
-                            "Label:   " + parsed_name["label"] if parsed_name["label"] else "")
+                            "Label: " + parsed_name["label"] if parsed_name["label"] else "")
     else:
         overlay.setProperty("artist", parsed_name["raw"])
         overlay.setProperty("track", "")
