@@ -7,7 +7,7 @@ def get_chapters():
     """Fetch chapters for the active video player via JSON-RPC.
 
     Returns a list of dicts: [{"index": int, "name": str, "time": float_seconds}, ...]
-    Returns empty list if no chapters or no active player.
+    Returns empty list if no chapters, no active player, or on error.
     """
     request = json.dumps({
         "jsonrpc": "2.0",
@@ -15,7 +15,19 @@ def get_chapters():
         "params": {"playerid": 1},
         "id": 1
     })
-    response = json.loads(xbmc.executeJSONRPC(request))
+    try:
+        raw = xbmc.executeJSONRPC(request)
+        response = json.loads(raw)
+    except (ValueError, TypeError) as e:
+        xbmc.log("service.chapternotify: JSON-RPC error: {}".format(e),
+                 xbmc.LOGWARNING)
+        return []
+
+    if "error" in response:
+        xbmc.log("service.chapternotify: JSON-RPC returned error: {}".format(
+            response["error"].get("message", "unknown")), xbmc.LOGDEBUG)
+        return []
+
     chapters_raw = response.get("result", {}).get("chapters", [])
     chapters = []
     for ch in chapters_raw:
