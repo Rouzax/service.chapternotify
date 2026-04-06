@@ -7,6 +7,7 @@ if __name__ == "__main__":
     xbmc.log("service.chapternotify: started", xbmc.LOGINFO)
 
     while not monitor.abortRequested():
+        player.tick()
         if monitor.waitForAbort(1):
             break
 

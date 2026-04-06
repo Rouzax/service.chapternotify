@@ -1,8 +1,8 @@
-import threading
+import time
 import xbmc
 import xbmcaddon
 from resources.lib.chapters import get_chapters, parse_chapter_name
-from resources.lib.overlay import show_chapter_overlay
+from resources.lib.overlay import create_chapter_overlay
 
 
 class ChapterPlayer(xbmc.Player):
@@ -10,11 +10,12 @@ class ChapterPlayer(xbmc.Player):
 
     def __init__(self):
         super().__init__()
-        self._polling = False
-        self._poll_thread = None
+        self._active = False
         self._chapters = []
         self._current_chapter_index = -1
-        self._current_overlay = None
+        self._overlay = None
+        self._overlay_show_time = 0
+        self._duration = 5
 
     def onAVStarted(self):
         try:
@@ -23,24 +24,66 @@ class ChapterPlayer(xbmc.Player):
             return
 
         if not self._matches_configured_path(filepath):
+            xbmc.log("service.chapternotify: path not monitored: {}".format(filepath),
+                     xbmc.LOGDEBUG)
             return
 
         chapters = get_chapters()
         if not chapters:
+            xbmc.log("service.chapternotify: no chapters found", xbmc.LOGDEBUG)
             return
 
+        addon = xbmcaddon.Addon("service.chapternotify")
+        self._duration = int(addon.getSetting("duration") or "5")
         self._chapters = chapters
         self._current_chapter_index = -1
-        self._start_polling()
+        self._active = True
+        xbmc.log("service.chapternotify: monitoring {} chapters".format(len(chapters)),
+                 xbmc.LOGINFO)
 
     def onPlayBackStopped(self):
-        self._stop_polling()
+        self._deactivate()
 
     def onPlayBackEnded(self):
-        self._stop_polling()
+        self._deactivate()
 
     def cleanup(self):
-        self._stop_polling()
+        self._deactivate()
+
+    def tick(self):
+        """Called from the main service loop every ~1 second.
+
+        Checks chapter transitions and manages overlay lifetime.
+        Must be called from the main thread.
+        """
+        if not self._active:
+            return
+
+        # Auto-hide overlay after duration
+        if self._overlay is not None:
+            if time.time() - self._overlay_show_time >= self._duration:
+                self._dismiss_overlay()
+
+        try:
+            current_time = self.getTime()
+        except RuntimeError:
+            self._deactivate()
+            return
+
+        chapter_index = self._get_chapter_for_time(current_time)
+        if chapter_index != self._current_chapter_index and chapter_index >= 0:
+            self._current_chapter_index = chapter_index
+            chapter = self._chapters[chapter_index]
+            parsed = parse_chapter_name(chapter["name"])
+            xbmc.log(
+                "service.chapternotify: chapter {} - {}".format(
+                    chapter_index + 1, chapter["name"]
+                ),
+                xbmc.LOGINFO,
+            )
+            self._dismiss_overlay()
+            self._overlay = create_chapter_overlay(parsed)
+            self._overlay_show_time = time.time()
 
     def _matches_configured_path(self, filepath):
         addon = xbmcaddon.Addon("service.chapternotify")
@@ -50,54 +93,19 @@ class ChapterPlayer(xbmc.Player):
                 return True
         return False
 
-    def _start_polling(self):
-        self._stop_polling()
-        self._polling = True
-        self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
-        self._poll_thread.start()
-
-    def _stop_polling(self):
-        self._polling = False
-        if self._poll_thread is not None:
-            self._poll_thread.join(timeout=2)
-            self._poll_thread = None
+    def _deactivate(self):
+        self._active = False
         self._chapters = []
         self._current_chapter_index = -1
         self._dismiss_overlay()
 
     def _dismiss_overlay(self):
-        if self._current_overlay is not None:
+        if self._overlay is not None:
             try:
-                self._current_overlay.cancel_timer()
-                self._current_overlay.close()
+                self._overlay.close()
             except RuntimeError:
                 pass
-            self._current_overlay = None
-
-    def _poll_loop(self):
-        monitor = xbmc.Monitor()
-        while self._polling and not monitor.abortRequested():
-            try:
-                current_time = self.getTime()
-            except RuntimeError:
-                break
-
-            chapter_index = self._get_chapter_for_time(current_time)
-            if chapter_index != self._current_chapter_index and chapter_index >= 0:
-                self._current_chapter_index = chapter_index
-                chapter = self._chapters[chapter_index]
-                parsed = parse_chapter_name(chapter["name"])
-                xbmc.log(
-                    "service.chapternotify: chapter {} - {}".format(
-                        chapter_index + 1, chapter["name"]
-                    ),
-                    xbmc.LOGINFO,
-                )
-                self._dismiss_overlay()
-                self._current_overlay = show_chapter_overlay(parsed)
-
-            if monitor.waitForAbort(1):
-                break
+            self._overlay = None
 
     def _get_chapter_for_time(self, current_time):
         """Return the index of the chapter that contains current_time."""

@@ -1,26 +1,24 @@
-import threading
 import xbmcaddon
 import xbmcgui
 
+# Action IDs that should dismiss the overlay
+ACTION_PREVIOUS_MENU = 10
+ACTION_NAV_BACK = 92
+ACTION_SELECT_ITEM = 7
+ACTION_STOP = 13
+
 
 class ChapterOverlay(xbmcgui.WindowXMLDialog):
-    """Overlay window that displays chapter info and auto-dismisses."""
-
-    def __init__(self, *args, **kwargs):
-        self._close_timer = None
+    """Non-blocking overlay that displays chapter info."""
 
     def onInit(self):
         pass
 
     def onAction(self, action):
-        # Any key/remote press dismisses the overlay
-        self.cancel_timer()
-        self.close()
-
-    def cancel_timer(self):
-        if self._close_timer is not None:
-            self._close_timer.cancel()
-            self._close_timer = None
+        action_id = action.getId()
+        if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
+                         ACTION_SELECT_ITEM, ACTION_STOP):
+            self.close()
 
 
 def _get_position_key(setting_value):
@@ -34,16 +32,16 @@ def _get_opacity_hex(percent):
     return "{:02X}000000".format(alpha)
 
 
-def show_chapter_overlay(parsed_name):
-    """Show the chapter overlay with the given parsed chapter info.
+def create_chapter_overlay(parsed_name):
+    """Create and show the chapter overlay.
 
-    Args:
-        parsed_name: dict with keys "artist", "track", "label", "raw"
+    Returns the overlay window instance. Caller is responsible for
+    closing it (via overlay.close()) when the display duration expires
+    or a new chapter starts.
     """
     addon = xbmcaddon.Addon("service.chapternotify")
     addon_path = addon.getAddonInfo("path")
 
-    duration = int(addon.getSetting("duration") or "5")
     position = int(addon.getSetting("position") or "0")
     opacity = int(addon.getSetting("opacity") or "70")
     animation = int(addon.getSetting("animation") or "0")
@@ -55,7 +53,6 @@ def show_chapter_overlay(parsed_name):
         "1080i",
     )
 
-    # Set window properties before showing
     overlay.setProperty("position", _get_position_key(position))
     overlay.setProperty("bgcolor", _get_opacity_hex(opacity))
     overlay.setProperty("animation", "fade" if animation == 0 else "slide")
@@ -69,16 +66,5 @@ def show_chapter_overlay(parsed_name):
         overlay.setProperty("track", "")
         overlay.setProperty("label", "")
 
-    def _safe_close(ovl):
-        try:
-            ovl.close()
-        except RuntimeError:
-            pass
-
     overlay.show()
-    # Auto-dismiss after duration
-    timer = threading.Timer(duration, _safe_close, args=[overlay])
-    overlay._close_timer = timer
-    timer.start()
-
     return overlay
