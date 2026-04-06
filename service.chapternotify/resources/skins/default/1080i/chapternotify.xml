@@ -19,7 +19,42 @@
             <bottom>120</bottom>
             <width>700</width>
             <height>140</height>
-            <include>ChapterNotifyContent</include>
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>700</width>
+                <height>140</height>
+                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+            </control>
+            <control type="label" id="101">
+                <left>30</left>
+                <top>18</top>
+                <width>640</width>
+                <height>40</height>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(artist)]</label>
+            </control>
+            <control type="label" id="102">
+                <left>30</left>
+                <top>58</top>
+                <width>640</width>
+                <height>35</height>
+                <font>font12</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(track)]</label>
+            </control>
+            <control type="label" id="103">
+                <left>30</left>
+                <top>95</top>
+                <width>640</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(label)]</label>
+            </control>
         </control>
 
         <!-- Bottom Left -->
@@ -29,7 +64,42 @@
             <bottom>120</bottom>
             <width>700</width>
             <height>140</height>
-            <include>ChapterNotifyContent</include>
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>700</width>
+                <height>140</height>
+                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+            </control>
+            <control type="label" id="201">
+                <left>30</left>
+                <top>18</top>
+                <width>640</width>
+                <height>40</height>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(artist)]</label>
+            </control>
+            <control type="label" id="202">
+                <left>30</left>
+                <top>58</top>
+                <width>640</width>
+                <height>35</height>
+                <font>font12</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(track)]</label>
+            </control>
+            <control type="label" id="203">
+                <left>30</left>
+                <top>95</top>
+                <width>640</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(label)]</label>
+            </control>
         </control>
 
         <!-- Top Right -->
@@ -39,7 +109,42 @@
             <top>60</top>
             <width>700</width>
             <height>140</height>
-            <include>ChapterNotifyContent</include>
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>700</width>
+                <height>140</height>
+                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+            </control>
+            <control type="label" id="301">
+                <left>30</left>
+                <top>18</top>
+                <width>640</width>
+                <height>40</height>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(artist)]</label>
+            </control>
+            <control type="label" id="302">
+                <left>30</left>
+                <top>58</top>
+                <width>640</width>
+                <height>35</height>
+                <font>font12</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(track)]</label>
+            </control>
+            <control type="label" id="303">
+                <left>30</left>
+                <top>95</top>
+                <width>640</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(label)]</label>
+            </control>
         </control>
     </controls>
 </window>
