@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window type="dialog">
     <zorder>3</zorder>
+
+    <!-- Fade animations -->
+    <animation effect="fade" start="0" end="100" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowOpen</animation>
+    <animation effect="fade" start="100" end="0" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowClose</animation>
+
+    <!-- Slide animations -->
+    <animation effect="slide" start="0,80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide)">WindowOpen</animation>
+    <animation effect="slide" start="0,0" end="0,80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide)">WindowClose</animation>
+
     <controls>
         <!-- Bottom Center -->
         <control type="group">
