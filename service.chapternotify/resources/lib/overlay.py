@@ -65,9 +65,10 @@ def create_chapter_overlay(parsed_name):
     overlay.setProperty("animation", "fade" if animation == 0 else "slide")
 
     if parsed_name["artist"]:
-        overlay.setProperty("artist", parsed_name["artist"])
-        overlay.setProperty("track", parsed_name["track"])
-        overlay.setProperty("label", parsed_name["label"])
+        overlay.setProperty("artist", "Artist:  " + parsed_name["artist"])
+        overlay.setProperty("track", "Track:   " + parsed_name["track"])
+        overlay.setProperty("label",
+                            "Label:   " + parsed_name["label"] if parsed_name["label"] else "")
     else:
         overlay.setProperty("artist", parsed_name["raw"])
         overlay.setProperty("track", "")
