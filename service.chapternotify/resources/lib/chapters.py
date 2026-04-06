@@ -9,6 +9,8 @@ def get_chapters():
     Returns a list of dicts: [{"index": int, "name": str, "time": float_seconds}, ...]
     Returns empty list if no chapters, no active player, or on error.
     """
+    from resources.lib import log
+
     request = json.dumps({
         "jsonrpc": "2.0",
         "method": "Player.GetChapters",
@@ -19,13 +21,13 @@ def get_chapters():
         raw = xbmc.executeJSONRPC(request)
         response = json.loads(raw)
     except (ValueError, TypeError) as e:
-        xbmc.log("service.chapternotify: JSON-RPC error: {}".format(e),
-                 xbmc.LOGWARNING)
+        log.warning("JSON-RPC parse error", event="jsonrpc.error", error=str(e))
         return []
 
     if "error" in response:
-        xbmc.log("service.chapternotify: JSON-RPC returned error: {}".format(
-            response["error"].get("message", "unknown")), xbmc.LOGDEBUG)
+        log.debug("JSON-RPC returned error",
+                  event="jsonrpc.error",
+                  message=response["error"].get("message", "unknown"))
         return []
 
     chapters_raw = response.get("result", {}).get("chapters", [])
@@ -37,6 +39,8 @@ def get_chapters():
             "name": ch.get("name", ""),
             "time": float(time_seconds),
         })
+
+    log.debug("Fetched chapters", event="jsonrpc.chapters", count=len(chapters))
     return chapters
 
 

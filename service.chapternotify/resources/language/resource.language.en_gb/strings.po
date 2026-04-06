@@ -36,6 +36,14 @@ msgctxt "#32003"
 msgid "Overlay"
 msgstr ""
 
+msgctxt "#32004"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Debugging"
+msgstr ""
+
 # =============================================================================
 # Settings Labels (32010-32029)
 # =============================================================================
@@ -66,6 +74,10 @@ msgstr ""
 
 msgctxt "#32016"
 msgid "Background opacity (%)"
+msgstr ""
+
+msgctxt "#32018"
+msgid "Debug logging"
 msgstr ""
 
 
@@ -119,5 +131,9 @@ msgstr ""
 
 msgctxt "#32055"
 msgid "Transparency of the notification background"
+msgstr ""
+
+msgctxt "#32057"
+msgid "Log detailed debug information to the Kodi log"
 msgstr ""
 

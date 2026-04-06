@@ -94,5 +94,14 @@
                 </setting>
             </group>
         </category>
+        <category id="advanced" label="32004" help="">
+            <group id="debugging" label="32005">
+                <setting id="debug" type="boolean" label="32018" help="32057">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+        </category>
     </section>
 </settings>

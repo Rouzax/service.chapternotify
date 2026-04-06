@@ -1,10 +1,25 @@
 import xbmc
-from resources.lib.player import ChapterPlayer
 
 if __name__ == "__main__":
     monitor = xbmc.Monitor()
-    player = ChapterPlayer()
-    xbmc.log("service.chapternotify: started", xbmc.LOGINFO)
+
+    try:
+        from resources.lib import log
+        log.init()
+        log.info("Service starting", event="service.start")
+
+        from resources.lib.player import ChapterPlayer
+        player = ChapterPlayer()
+        log.info("Service started", event="service.ready")
+    except Exception as e:
+        xbmc.log("[ChapterNotify] Failed to start: {}".format(e), xbmc.LOGERROR)
+        import traceback
+        xbmc.log("[ChapterNotify] {}".format(traceback.format_exc()), xbmc.LOGERROR)
+        # Still need to keep service alive to avoid Kodi restart loops
+        while not monitor.abortRequested():
+            if monitor.waitForAbort(10):
+                break
+        raise SystemExit
 
     while not monitor.abortRequested():
         player.tick()
@@ -12,4 +27,4 @@ if __name__ == "__main__":
             break
 
     player.cleanup()
-    xbmc.log("service.chapternotify: stopped", xbmc.LOGINFO)
+    log.info("Service stopped", event="service.stop")
