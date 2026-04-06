@@ -8,6 +8,7 @@
                     <default></default>
                     <constraints>
                         <allowempty>true</allowempty>
+                        <writable>false</writable>
                         <sources>
                             <source>videos</source>
                         </sources>
@@ -21,6 +22,7 @@
                     <default></default>
                     <constraints>
                         <allowempty>true</allowempty>
+                        <writable>false</writable>
                         <sources>
                             <source>videos</source>
                         </sources>
@@ -34,6 +36,7 @@
                     <default></default>
                     <constraints>
                         <allowempty>true</allowempty>
+                        <writable>false</writable>
                         <sources>
                             <source>videos</source>
                         </sources>
