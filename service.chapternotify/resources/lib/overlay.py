@@ -1,5 +1,4 @@
 import threading
-import xbmc
 import xbmcaddon
 import xbmcgui
 
@@ -35,12 +34,11 @@ def _get_opacity_hex(percent):
     return "{:02X}000000".format(alpha)
 
 
-def show_chapter_overlay(parsed_name, on_close=None):
+def show_chapter_overlay(parsed_name):
     """Show the chapter overlay with the given parsed chapter info.
 
     Args:
         parsed_name: dict with keys "artist", "track", "label", "raw"
-        on_close: optional callback when overlay closes
     """
     addon = xbmcaddon.Addon("service.chapternotify")
     addon_path = addon.getAddonInfo("path")
