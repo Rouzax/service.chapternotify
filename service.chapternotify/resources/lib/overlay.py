@@ -22,7 +22,14 @@ class ChapterOverlay(xbmcgui.WindowXMLDialog):
 
 
 def _get_position_key(setting_value):
-    positions = {0: "bottom_center", 1: "bottom_left", 2: "top_right"}
+    positions = {
+        0: "bottom_center",
+        1: "bottom_left",
+        2: "bottom_right",
+        3: "top_center",
+        4: "top_left",
+        5: "top_right",
+    }
     return positions.get(setting_value, "bottom_center")
 
 

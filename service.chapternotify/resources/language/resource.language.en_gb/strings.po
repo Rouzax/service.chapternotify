@@ -109,6 +109,18 @@ msgctxt "#32034"
 msgid "Top right"
 msgstr ""
 
+msgctxt "#32035"
+msgid "Bottom right"
+msgstr ""
+
+msgctxt "#32036"
+msgid "Top center"
+msgstr ""
+
+msgctxt "#32037"
+msgid "Top left"
+msgstr ""
+
 # =============================================================================
 # Help Text (32050-32069)
 # =============================================================================
