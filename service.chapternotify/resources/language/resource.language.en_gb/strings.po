@@ -1,0 +1,129 @@
+# Kodi Media Center language file
+# Addon Name: Chapter Notify
+# Addon id: service.chapternotify
+# Addon Provider: martijn
+msgid ""
+msgstr ""
+"Project-Id-Version: Kodi Addons\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kodi Translation Team\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# =============================================================================
+# Categories and Groups (32000-32009)
+# =============================================================================
+
+msgctxt "#32000"
+msgid "General"
+msgstr ""
+
+msgctxt "#32001"
+msgid "Library Paths"
+msgstr ""
+
+msgctxt "#32002"
+msgid "Display"
+msgstr ""
+
+msgctxt "#32003"
+msgid "Overlay"
+msgstr ""
+
+# =============================================================================
+# Settings Labels (32010-32029)
+# =============================================================================
+
+msgctxt "#32010"
+msgid "Library path 1"
+msgstr ""
+
+msgctxt "#32011"
+msgid "Library path 2"
+msgstr ""
+
+msgctxt "#32012"
+msgid "Library path 3"
+msgstr ""
+
+msgctxt "#32013"
+msgid "Display duration (seconds)"
+msgstr ""
+
+msgctxt "#32014"
+msgid "Animation style"
+msgstr ""
+
+msgctxt "#32015"
+msgid "Position"
+msgstr ""
+
+msgctxt "#32016"
+msgid "Background opacity (%)"
+msgstr ""
+
+msgctxt "#32017"
+msgid "Play sound"
+msgstr ""
+
+# =============================================================================
+# Option Labels (32030-32039)
+# =============================================================================
+
+msgctxt "#32030"
+msgid "Fade"
+msgstr ""
+
+msgctxt "#32031"
+msgid "Slide"
+msgstr ""
+
+msgctxt "#32032"
+msgid "Bottom center"
+msgstr ""
+
+msgctxt "#32033"
+msgid "Bottom left"
+msgstr ""
+
+msgctxt "#32034"
+msgid "Top right"
+msgstr ""
+
+# =============================================================================
+# Help Text (32050-32069)
+# =============================================================================
+
+msgctxt "#32050"
+msgid "Folder path to monitor for chapter notifications"
+msgstr ""
+
+msgctxt "#32051"
+msgid "Additional folder path (optional)"
+msgstr ""
+
+msgctxt "#32052"
+msgid "How long the notification stays on screen"
+msgstr ""
+
+msgctxt "#32053"
+msgid "How the notification appears and disappears"
+msgstr ""
+
+msgctxt "#32054"
+msgid "Where the notification appears on screen"
+msgstr ""
+
+msgctxt "#32055"
+msgid "Transparency of the notification background"
+msgstr ""
+
+msgctxt "#32056"
+msgid "Play a sound when a new chapter starts"
+msgstr ""
