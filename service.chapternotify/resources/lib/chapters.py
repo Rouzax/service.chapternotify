@@ -1,47 +1,30 @@
-import json
 import re
 import xbmc
 
 
-def get_chapters():
-    """Fetch chapters for the active video player via JSON-RPC.
+def get_current_chapter():
+    """Get the current chapter number, total count, and name via info labels.
 
-    Returns a list of dicts: [{"index": int, "name": str, "time": float_seconds}, ...]
-    Returns empty list if no chapters, no active player, or on error.
+    Returns a dict: {"chapter": int, "count": int, "name": str}
+    Returns None if no chapter info is available.
     """
-    from resources.lib import log
+    chapter_str = xbmc.getInfoLabel("Player.Chapter")
+    count_str = xbmc.getInfoLabel("Player.ChapterCount")
+    name = xbmc.getInfoLabel("Player.ChapterName")
 
-    request = json.dumps({
-        "jsonrpc": "2.0",
-        "method": "Player.GetChapters",
-        "params": {"playerid": 1},
-        "id": 1
-    })
+    if not chapter_str or not count_str:
+        return None
+
     try:
-        raw = xbmc.executeJSONRPC(request)
-        response = json.loads(raw)
-    except (ValueError, TypeError) as e:
-        log.warning("JSON-RPC parse error", event="jsonrpc.error", error=str(e))
-        return []
+        chapter = int(chapter_str)
+        count = int(count_str)
+    except ValueError:
+        return None
 
-    if "error" in response:
-        log.debug("JSON-RPC returned error",
-                  event="jsonrpc.error",
-                  message=response["error"].get("message", "unknown"))
-        return []
+    if count <= 1:
+        return None
 
-    chapters_raw = response.get("result", {}).get("chapters", [])
-    chapters = []
-    for ch in chapters_raw:
-        time_seconds = ch.get("time", 0)
-        chapters.append({
-            "index": ch.get("index", 0),
-            "name": ch.get("name", ""),
-            "time": float(time_seconds),
-        })
-
-    log.debug("Fetched chapters", event="jsonrpc.chapters", count=len(chapters))
-    return chapters
+    return {"chapter": chapter, "count": count, "name": name}
 
 
 def parse_chapter_name(name):

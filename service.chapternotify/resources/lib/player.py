@@ -2,7 +2,7 @@ import time
 import xbmc
 import xbmcaddon
 from resources.lib import log
-from resources.lib.chapters import get_chapters, parse_chapter_name
+from resources.lib.chapters import get_current_chapter, parse_chapter_name
 from resources.lib.overlay import create_chapter_overlay
 
 
@@ -12,8 +12,7 @@ class ChapterPlayer(xbmc.Player):
     def __init__(self):
         super().__init__()
         self._active = False
-        self._chapters = []
-        self._current_chapter_index = -1
+        self._current_chapter = -1
         self._overlay = None
         self._overlay_show_time = 0
         self._duration = 5
@@ -27,22 +26,15 @@ class ChapterPlayer(xbmc.Player):
         log.debug("Playback started", event="playback.start", file=filepath)
 
         if not self._matches_configured_path(filepath):
-            log.debug("Path not monitored", event="playback.skip", file=filepath)
+            log.debug("Path not monitored", event="playback.skip")
             return
 
-        log.info("Path matched, fetching chapters", event="playback.match", file=filepath)
-
-        chapters = get_chapters()
-        if not chapters:
-            log.debug("No chapters found", event="chapters.none")
-            return
+        log.info("Path matched, monitoring chapters", event="playback.match", file=filepath)
 
         addon = xbmcaddon.Addon("service.chapternotify")
         self._duration = int(addon.getSetting("duration") or "5")
-        self._chapters = chapters
-        self._current_chapter_index = -1
+        self._current_chapter = -1
         self._active = True
-        log.info("Monitoring chapters", event="chapters.loaded", count=len(chapters))
 
     def onPlayBackStopped(self):
         if self._active:
@@ -67,26 +59,19 @@ class ChapterPlayer(xbmc.Player):
             if time.time() - self._overlay_show_time >= self._duration:
                 self._dismiss_overlay()
 
-        try:
-            current_time = self.getTime()
-        except RuntimeError:
-            self._deactivate()
+        chapter_info = get_current_chapter()
+        if chapter_info is None:
             return
 
-        chapter_index = self._get_chapter_for_time(current_time)
-        if chapter_index != self._current_chapter_index and chapter_index >= 0:
-            self._current_chapter_index = chapter_index
-            chapter = self._chapters[chapter_index]
-            parsed = parse_chapter_name(chapter["name"])
+        chapter_num = chapter_info["chapter"]
+        if chapter_num != self._current_chapter:
+            self._current_chapter = chapter_num
+            parsed = parse_chapter_name(chapter_info["name"])
             log.info("Chapter changed",
                      event="chapter.change",
-                     index=chapter_index + 1,
-                     name=chapter["name"])
-            log.debug("Parsed chapter",
-                      event="chapter.parsed",
-                      artist=parsed["artist"],
-                      track=parsed["track"],
-                      label=parsed["label"])
+                     chapter=chapter_num,
+                     total=chapter_info["count"],
+                     name=chapter_info["name"])
             self._dismiss_overlay()
             try:
                 self._overlay = create_chapter_overlay(parsed)
@@ -100,14 +85,13 @@ class ChapterPlayer(xbmc.Player):
             path = addon.getSetting(key)
             log.debug("Checking path setting", event="path.check", key=key, configured=path)
             if path and filepath.startswith(path):
-                log.debug("Path matched", event="path.match", key=key, configured=path)
+                log.debug("Path matched", event="path.match", key=key)
                 return True
         return False
 
     def _deactivate(self):
         self._active = False
-        self._chapters = []
-        self._current_chapter_index = -1
+        self._current_chapter = -1
         self._dismiss_overlay()
 
     def _dismiss_overlay(self):
@@ -117,13 +101,3 @@ class ChapterPlayer(xbmc.Player):
             except RuntimeError:
                 pass
             self._overlay = None
-
-    def _get_chapter_for_time(self, current_time):
-        """Return the index of the chapter that contains current_time."""
-        result = -1
-        for i, ch in enumerate(self._chapters):
-            if current_time >= ch["time"]:
-                result = i
-            else:
-                break
-        return result
