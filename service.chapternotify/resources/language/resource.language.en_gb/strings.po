@@ -68,9 +68,6 @@ msgctxt "#32016"
 msgid "Background opacity (%)"
 msgstr ""
 
-msgctxt "#32017"
-msgid "Play sound"
-msgstr ""
 
 # =============================================================================
 # Option Labels (32030-32039)
@@ -124,6 +121,3 @@ msgctxt "#32055"
 msgid "Transparency of the notification background"
 msgstr ""
 
-msgctxt "#32056"
-msgid "Play a sound when a new chapter starts"
-msgstr ""

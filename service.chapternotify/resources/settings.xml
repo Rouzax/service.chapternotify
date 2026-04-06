@@ -3,20 +3,44 @@
     <section id="service.chapternotify">
         <category id="general" label="32000" help="">
             <group id="paths" label="32001">
-                <setting id="path1" type="string" label="32010" help="32050">
+                <setting id="path1" type="path" label="32010" help="32050">
                     <level>0</level>
                     <default></default>
-                    <control type="edit" format="string"/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                        <sources>
+                            <source>videos</source>
+                        </sources>
+                    </constraints>
+                    <control type="button" format="path">
+                        <heading>32010</heading>
+                    </control>
                 </setting>
-                <setting id="path2" type="string" label="32011" help="32051">
+                <setting id="path2" type="path" label="32011" help="32051">
                     <level>0</level>
                     <default></default>
-                    <control type="edit" format="string"/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                        <sources>
+                            <source>videos</source>
+                        </sources>
+                    </constraints>
+                    <control type="button" format="path">
+                        <heading>32011</heading>
+                    </control>
                 </setting>
-                <setting id="path3" type="string" label="32012" help="32051">
+                <setting id="path3" type="path" label="32012" help="32051">
                     <level>0</level>
                     <default></default>
-                    <control type="edit" format="string"/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                        <sources>
+                            <source>videos</source>
+                        </sources>
+                    </constraints>
+                    <control type="button" format="path">
+                        <heading>32012</heading>
+                    </control>
                 </setting>
             </group>
         </category>
@@ -64,11 +88,6 @@
                         <maximum>90</maximum>
                     </constraints>
                     <control type="slider" format="integer"/>
-                </setting>
-                <setting id="sound" type="boolean" label="32017" help="32056">
-                    <level>0</level>
-                    <default>false</default>
-                    <control type="toggle"/>
                 </setting>
             </group>
         </category>
