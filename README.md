@@ -8,6 +8,8 @@ The perfect companion to [CrateDigger](https://github.com/Rouzax/CrateDigger), w
 
 Built for Kodi 21+ (Omega and newer).
 
+![Chapter Notify overlay during playback](docs/assets/screenshot-overlay.png)
+
 ---
 
 ## How It Works
