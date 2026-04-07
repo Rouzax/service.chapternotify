@@ -1,7 +1,7 @@
 Chapter Notify Changelog
 ========================
 
-v0.3.0 (2026-04-07)
+v0.5.0 (2026-04-07)
 --------------------------
 New Features:
   - Styled overlay notification for chapter changes during video playback.
