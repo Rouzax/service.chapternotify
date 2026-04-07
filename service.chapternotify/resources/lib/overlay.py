@@ -74,12 +74,12 @@ def create_chapter_overlay(parsed_name):
     position_key = _get_position_key(position)
     overlay.setProperty("position", position_key)
 
-    # Theme colors — accent border and separator at full opacity
+    # Theme colors - accent border and separator at full opacity
     colors = THEME_COLORS.get(theme, THEME_COLORS[0])
     overlay.setProperty("accent", colors['accent'])
     overlay.setProperty("accentglow", colors['accentglow'])
 
-    # Background — dark panel with configurable opacity
+    # Background - dark panel with configurable opacity
     alpha_hex = "{:02X}".format(int(opacity * 255 / 100))
     overlay.setProperty("bgvisible", "true" if show_bg else "false")
     overlay.setProperty("bgcolor", alpha_hex + "0D1117")
