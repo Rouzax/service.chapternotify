@@ -80,13 +80,17 @@ msgctxt "#32018"
 msgid "Debug logging"
 msgstr ""
 
+msgctxt "#32017"
+msgid "Show background"
+msgstr ""
+
 msgctxt "#32019"
 msgid "Test overlay"
 msgstr ""
 
 
 # =============================================================================
-# Option Labels (32030-32039)
+# Option Labels (32030-32049)
 # =============================================================================
 
 msgctxt "#32030"
@@ -121,6 +125,26 @@ msgctxt "#32037"
 msgid "Top left"
 msgstr ""
 
+msgctxt "#32040"
+msgid "Golden Hour"
+msgstr ""
+
+msgctxt "#32041"
+msgid "Ultraviolet"
+msgstr ""
+
+msgctxt "#32042"
+msgid "Ember"
+msgstr ""
+
+msgctxt "#32043"
+msgid "Nightfall"
+msgstr ""
+
+msgctxt "#32044"
+msgid "Theme"
+msgstr ""
+
 # =============================================================================
 # Help Text (32050-32069)
 # =============================================================================
@@ -149,11 +173,19 @@ msgctxt "#32055"
 msgid "Transparency of the notification background"
 msgstr ""
 
+msgctxt "#32056"
+msgid "Show the panel background and accent border"
+msgstr ""
+
 msgctxt "#32057"
 msgid "Log detailed debug information to the Kodi log"
 msgstr ""
 
 msgctxt "#32058"
 msgid "Show a sample notification to test your display settings"
+msgstr ""
+
+msgctxt "#32059"
+msgid "Color theme for the notification border and accents"
 msgstr ""
 

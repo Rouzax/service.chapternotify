@@ -5,15 +5,15 @@
 
     <!-- Fade animations -->
     <animation effect="fade" start="0" end="100" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowOpen</animation>
-    <animation effect="fade" start="100" end="0" time="500" condition="String.IsEqual(Window.Property(animation),fade)">WindowClose</animation>
+    <animation effect="fade" start="100" end="0" time="500" condition="String.IsEqual(Window.Property(animation),fade) + !String.IsEqual(Window.Property(quickclose),true)">WindowClose</animation>
 
     <!-- Slide up animations (for bottom positions) -->
     <animation effect="slide" start="0,80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide_up)">WindowOpen</animation>
-    <animation effect="slide" start="0,0" end="0,80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_up)">WindowClose</animation>
+    <animation effect="slide" start="0,0" end="0,80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_up) + !String.IsEqual(Window.Property(quickclose),true)">WindowClose</animation>
 
     <!-- Slide down animations (for top positions) -->
     <animation effect="slide" start="0,-80" end="0,0" time="400" tween="sine" easing="out" condition="String.IsEqual(Window.Property(animation),slide_down)">WindowOpen</animation>
-    <animation effect="slide" start="0,0" end="0,-80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_down)">WindowClose</animation>
+    <animation effect="slide" start="0,0" end="0,-80" time="400" tween="sine" easing="in" condition="String.IsEqual(Window.Property(animation),slide_down) + !String.IsEqual(Window.Property(quickclose),true)">WindowClose</animation>
 
     <controls>
         <!-- Bottom Center -->
@@ -22,42 +22,91 @@
             <centerleft>50%</centerleft>
             <bottom>120</bottom>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="101">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="102">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="103">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
 
@@ -67,42 +116,91 @@
             <left>60</left>
             <bottom>120</bottom>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="201">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="202">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="203">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
 
@@ -112,42 +210,91 @@
             <right>60</right>
             <bottom>120</bottom>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="301">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="302">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="303">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
 
@@ -157,42 +304,91 @@
             <centerleft>50%</centerleft>
             <top>60</top>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="401">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="402">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="403">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
 
@@ -202,42 +398,91 @@
             <left>60</left>
             <top>60</top>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="501">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="502">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="503">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
 
@@ -247,42 +492,91 @@
             <right>60</right>
             <top>60</top>
             <width>700</width>
-            <height>140</height>
+            <height>150</height>
             <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>0</left>
                 <top>0</top>
                 <width>700</width>
-                <height>140</height>
-                <texture colordiffuse="$INFO[Window.Property(bgcolor)]">colors/white.png</texture>
+                <height>150</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(bgcolor)]">common/white_rounded.png</texture>
             </control>
-            <control type="label" id="601">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
+                <left>-2</left>
+                <top>-2</top>
+                <width>704</width>
+                <height>154</height>
+                <texture border="12" colordiffuse="$INFO[Window.Property(accent)]">common/border_rounded.png</texture>
+            </control>
+            <control type="label">
                 <left>30</left>
                 <top>18</top>
-                <width>640</width>
+                <width>100</width>
                 <height>40</height>
-                <font>font13</font>
+                <font>font14</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_artist)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>18</top>
+                <width>540</width>
+                <height>40</height>
+                <font>font14</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(artist)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="602">
+            <control type="image">
+                <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
                 <top>58</top>
                 <width>640</width>
+                <height>2</height>
+                <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
+            </control>
+            <control type="label">
+                <left>30</left>
+                <top>62</top>
+                <width>100</width>
                 <height>35</height>
-                <font>font12</font>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <shadowcolor>AA000000</shadowcolor>
+                <label>$INFO[Window.Property(prefix_track)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>62</top>
+                <width>540</width>
+                <height>35</height>
+                <font>font13</font>
                 <textcolor>FFFFFFFF</textcolor>
                 <shadowcolor>AA000000</shadowcolor>
                 <label>$INFO[Window.Property(track)]</label>
+                <scroll>true</scroll>
             </control>
-            <control type="label" id="603">
+            <control type="label">
                 <left>30</left>
-                <top>95</top>
-                <width>640</width>
+                <top>100</top>
+                <width>100</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>99FFFFFF</textcolor>
+                <label>$INFO[Window.Property(prefix_label)]</label>
+            </control>
+            <control type="label">
+                <left>130</left>
+                <top>100</top>
+                <width>540</width>
                 <height>30</height>
                 <font>font10</font>
                 <textcolor>99FFFFFF</textcolor>
                 <label>$INFO[Window.Property(label)]</label>
+                <scroll>true</scroll>
             </control>
         </control>
     </controls>

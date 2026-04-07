@@ -1,24 +1,39 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Rouzax
 import xbmcaddon
 import xbmcgui
 
-# Action IDs that should dismiss the overlay
-ACTION_PREVIOUS_MENU = 10
-ACTION_NAV_BACK = 92
-ACTION_SELECT_ITEM = 7
-ACTION_STOP = 13
-
+THEME_COLORS = {
+    0: {  # Golden Hour
+        'accent': 'FFF5A623',
+        'accentglow': 'FFF5C564',
+    },
+    1: {  # Ultraviolet
+        'accent': 'FFA78BFA',
+        'accentglow': 'FFC4B5FD',
+    },
+    2: {  # Ember
+        'accent': 'FFF87171',
+        'accentglow': 'FFFCA5A5',
+    },
+    3: {  # Nightfall
+        'accent': 'FF60A5FA',
+        'accentglow': 'FF93C5FD',
+    },
+}
 
 class ChapterOverlay(xbmcgui.WindowXMLDialog):
-    """Non-blocking overlay that displays chapter info."""
+    """Overlay that displays chapter info.
+
+    Any button press closes the overlay instantly (no animation).
+    """
 
     def onInit(self):
         pass
 
     def onAction(self, action):
-        action_id = action.getId()
-        if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
-                         ACTION_SELECT_ITEM, ACTION_STOP):
-            self.close()
+        self.setProperty("quickclose", "true")
+        self.close()
 
 
 def _get_position_key(setting_value):
@@ -31,12 +46,6 @@ def _get_position_key(setting_value):
         5: "top_right",
     }
     return positions.get(setting_value, "bottom_center")
-
-
-def _get_opacity_hex(percent):
-    """Convert opacity percentage (40-90) to hex alpha value."""
-    alpha = int(percent * 255 / 100)
-    return "{:02X}000000".format(alpha)
 
 
 def create_chapter_overlay(parsed_name):
@@ -52,6 +61,8 @@ def create_chapter_overlay(parsed_name):
     position = int(addon.getSetting("position") or "0")
     opacity = int(addon.getSetting("opacity") or "70")
     animation = int(addon.getSetting("animation") or "0")
+    theme = int(addon.getSetting("theme") or "0")
+    show_bg = addon.getSetting("show_background") == "true"
 
     overlay = ChapterOverlay(
         "chapternotify.xml",
@@ -62,7 +73,17 @@ def create_chapter_overlay(parsed_name):
 
     position_key = _get_position_key(position)
     overlay.setProperty("position", position_key)
-    overlay.setProperty("bgcolor", _get_opacity_hex(opacity))
+
+    # Theme colors — accent border and separator at full opacity
+    colors = THEME_COLORS.get(theme, THEME_COLORS[0])
+    overlay.setProperty("accent", colors['accent'])
+    overlay.setProperty("accentglow", colors['accentglow'])
+
+    # Background — dark panel with configurable opacity
+    alpha_hex = "{:02X}".format(int(opacity * 255 / 100))
+    overlay.setProperty("bgvisible", "true" if show_bg else "false")
+    overlay.setProperty("bgcolor", alpha_hex + "0D1117")
+
     if animation == 0:
         overlay.setProperty("animation", "fade")
     else:
@@ -70,14 +91,15 @@ def create_chapter_overlay(parsed_name):
         overlay.setProperty("animation", "slide_down" if is_top else "slide_up")
 
     if parsed_name["artist"]:
-        overlay.setProperty("artist", "Artist: " + parsed_name["artist"])
-        overlay.setProperty("track", "Track: " + parsed_name["track"])
-        overlay.setProperty("label",
-                            "Label: " + parsed_name["label"] if parsed_name["label"] else "")
+        overlay.setProperty("prefix_artist", "Track:")
+        overlay.setProperty("artist", parsed_name["track"])
+        overlay.setProperty("prefix_track", "Artist:")
+        overlay.setProperty("track", parsed_name["artist"])
+        if parsed_name["label"]:
+            overlay.setProperty("prefix_label", "Label:")
+            overlay.setProperty("label", parsed_name["label"])
     else:
         overlay.setProperty("artist", parsed_name["raw"])
-        overlay.setProperty("track", "")
-        overlay.setProperty("label", "")
 
     overlay.show()
     return overlay
