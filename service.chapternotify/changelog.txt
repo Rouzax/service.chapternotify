@@ -4,36 +4,23 @@ Chapter Notify Changelog
 v0.3.0 (2026-04-07)
 --------------------------
 New Features:
+  - Styled overlay notification for chapter changes during video playback.
+    Designed for concert recordings and festival DJ sets with named chapters
+    created by CrateDigger.
+  - Chapter name parsing for "Artist - Track [Label]" format with split
+    prefix/value labels. Prefixes stay fixed, values scroll for long text.
+  - 6 overlay positions (top/bottom × left/center/right) with fade and slide
+    animation styles.
   - EasyTV-style theming with 4 color themes: Golden Hour, Ultraviolet,
     Ember, and Nightfall. Accent border and separator line tinted to match.
-  - Rounded panel background using white_rounded.png with configurable opacity
-    (0-100%). Custom border_rounded.png texture for hollow accent rim.
-  - Toggle to show/hide background panel entirely (floating text mode).
-  - Split prefix/value labels: "Track:", "Artist:", "Label:" stay fixed while
-    values scroll horizontally for long text.
-  - Any button press dismisses overlay instantly (quickclose property skips
-    WindowClose animation). No input blocking.
+  - Rounded panel background with configurable opacity (0-100%) and toggle
+    to show/hide background entirely (floating text mode).
+  - Configurable library paths (up to 3), display duration, and debug logging.
   - Test overlay button in addon settings.
-
-Bug Fixes:
-  - Fixed missing background: white.png texture was not included in addon
-    media folder, causing Kodi to silently skip rendering.
-  - Fixed overlay blocking video controls: WindowXMLDialog is hardcoded modal
-    in Kodi. Attempted WindowXML (full-screen takeover) and action forwarding
-    (async callback timing issues). Final solution: instant dismiss on any
-    button press with quickclose animation skip.
+  - Any button press dismisses overlay instantly. No input blocking.
 
 Internal:
-  - Replaced plain white.png colordiffuse background with layered approach:
-    white_rounded.png (dark panel, opacity-controlled) + border_rounded.png
-    (hollow accent ring, full opacity).
-  - Removed Includes.xml approach — Kodi only loads includes for the active
-    skin, not addon windows. All controls inlined in chapternotify.xml.
-
-v0.2.4 (2026-04-06)
---------------------------
-New Features:
-  - Initial overlay implementation with 6 position options.
-  - Fade and slide animation styles.
-  - Chapter name parsing for "Artist - Track [Label]" format.
-  - Configurable library paths, display duration, and debug logging.
+  - Layered background: white_rounded.png (dark panel, opacity-controlled) +
+    border_rounded.png (hollow accent ring, full opacity on top).
+  - WindowXMLDialog with quickclose property to skip closing animation on
+    user dismiss, preventing action blocking during animation.
