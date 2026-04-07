@@ -41,7 +41,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -51,7 +51,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -63,14 +63,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -80,7 +80,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -91,7 +91,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -100,7 +100,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>
@@ -135,7 +135,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -145,7 +145,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -157,14 +157,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -174,7 +174,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -185,7 +185,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -194,7 +194,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>
@@ -229,7 +229,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -239,7 +239,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -251,14 +251,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -268,7 +268,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -279,7 +279,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -288,7 +288,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>
@@ -323,7 +323,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -333,7 +333,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -345,14 +345,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -362,7 +362,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -373,7 +373,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -382,7 +382,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>
@@ -417,7 +417,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -427,7 +427,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -439,14 +439,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -456,7 +456,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -467,7 +467,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -476,7 +476,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>
@@ -511,7 +511,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>18</top>
+                <top>14</top>
                 <width>100</width>
                 <height>40</height>
                 <font>font14</font>
@@ -521,7 +521,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>18</top>
+                <top>14</top>
                 <width>540</width>
                 <height>40</height>
                 <font>font14</font>
@@ -533,14 +533,14 @@
             <control type="image">
                 <visible>String.IsEqual(Window.Property(bgvisible),true)</visible>
                 <left>30</left>
-                <top>58</top>
+                <top>62</top>
                 <width>640</width>
                 <height>2</height>
                 <texture colordiffuse="$INFO[Window.Property(accentglow)]">common/line_fade.png</texture>
             </control>
             <control type="label">
                 <left>30</left>
-                <top>62</top>
+                <top>70</top>
                 <width>100</width>
                 <height>35</height>
                 <font>font13</font>
@@ -550,7 +550,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>62</top>
+                <top>70</top>
                 <width>540</width>
                 <height>35</height>
                 <font>font13</font>
@@ -561,7 +561,7 @@
             </control>
             <control type="label">
                 <left>30</left>
-                <top>100</top>
+                <top>110</top>
                 <width>100</width>
                 <height>30</height>
                 <font>font10</font>
@@ -570,7 +570,7 @@
             </control>
             <control type="label">
                 <left>130</left>
-                <top>100</top>
+                <top>110</top>
                 <width>540</width>
                 <height>30</height>
                 <font>font10</font>

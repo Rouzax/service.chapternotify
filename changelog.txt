@@ -1,6 +1,14 @@
 Chapter Notify Changelog
 ========================
 
+v0.5.1 (2026-04-07)
+--------------------------
+Bug Fixes:
+  - Fixed text descenders (g, y, p, q) overlapping the accent separator line.
+    Applied EasyTV descender padding rules with minimum 4px visual gap between
+    all text lines and the accent line. Moved line 1 to top=14, accent to
+    top=62, line 2 to top=70, line 3 to top=110.
+
 v0.5.0 (2026-04-07)
 --------------------------
 New Features:
