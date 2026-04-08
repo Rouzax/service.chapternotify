@@ -178,5 +178,32 @@ class ChapterPlayer(xbmc.Player):
         self._on_manual_trigger()
 
     def _on_manual_trigger(self):
-        """Real implementation added in Task 9."""
-        pass
+        """Toggle: if overlay is showing, dismiss. Otherwise show current chapter
+        info regardless of monitored-path filter. Silent no-op if no chapter info.
+        """
+        # Toggle off if already visible
+        if self._overlay is not None:
+            log.debug("Manual trigger: toggling off", event="manual.toggle.off")
+            self._dismiss_overlay()
+            return
+
+        # Show: fetch chapter info regardless of path filter
+        chapter_info = get_current_chapter()
+        if chapter_info is None:
+            log.debug("Manual trigger: no chapter info available",
+                      event="manual.noinfo")
+            return
+
+        parsed = parse_chapter_name(chapter_info["name"])
+        log.info("Manual trigger: showing overlay",
+                 event="manual.show",
+                 chapter=chapter_info["chapter"])
+        try:
+            self._overlay = create_chapter_overlay(parsed)
+            self._overlay_show_time = time.time()
+            # Sync _current_chapter so Auto-mode (in Both) does not immediately
+            # re-show the same chapter on the next tick.
+            self._current_chapter = chapter_info["chapter"]
+        except Exception as e:
+            log.error("Manual trigger: overlay failed",
+                      event="manual.error", error=str(e))
