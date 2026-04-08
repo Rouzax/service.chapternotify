@@ -6,6 +6,7 @@ in a non-Kodi environment for unit testing.
 Real Kodi behavior is verified via the manual smoke test matrix in
 docs/plans/2026-04-08-button-trigger-design.md.
 """
+# pyright: reportAttributeAccessIssue=false
 import sys
 import types
 from unittest.mock import MagicMock
