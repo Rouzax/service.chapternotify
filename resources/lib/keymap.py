@@ -58,6 +58,12 @@ def _render(key):
     Generates a <FullscreenVideo>-scoped binding with a <keyboard> entry and
     an additional <remote> entry only for the four color buttons.
 
+    The binding is intentionally NOT global. Chapter notifications only make
+    sense during video playback, so the trigger should only fire there.
+    Outside playback the user's normal Kodi shortcuts continue to work
+    unmodified, even if the chosen key happens to have a default binding
+    elsewhere (e.g. e=TVGuide, p=Play).
+
     The key is normalized; invalid input falls back to DEFAULT_KEY rather
     than raising, so a bad setting can never crash the service.
     """
