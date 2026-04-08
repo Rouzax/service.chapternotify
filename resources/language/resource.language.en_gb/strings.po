@@ -189,3 +189,59 @@ msgctxt "#32059"
 msgid "Color theme for the notification border and accents"
 msgstr ""
 
+msgctxt "#32100"
+msgid "Trigger"
+msgstr ""
+
+msgctxt "#32101"
+msgid "Mode"
+msgstr ""
+
+msgctxt "#32102"
+msgid "Button"
+msgstr ""
+
+msgctxt "#32103"
+msgid "Remove keymap binding"
+msgstr ""
+
+msgctxt "#32110"
+msgid "Auto"
+msgstr ""
+
+msgctxt "#32111"
+msgid "Manual"
+msgstr ""
+
+msgctxt "#32112"
+msgid "Both"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Yellow"
+msgstr ""
+
+msgctxt "#32121"
+msgid "Red"
+msgstr ""
+
+msgctxt "#32122"
+msgid "Green"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Blue"
+msgstr ""
+
+msgctxt "#32151"
+msgid "Auto: notifications appear on chapter change for the library paths above. Manual: notifications appear only when you press the configured button (works for any media with chapters, not just the library paths). Both: combines Auto and Manual."
+msgstr ""
+
+msgctxt "#32152"
+msgid "Choose which color button on your remote summons the chapter notification during fullscreen video. The binding is installed automatically when you change this setting."
+msgstr ""
+
+msgctxt "#32153"
+msgid "Removes the button binding installed by this addon. Use before uninstalling the addon to avoid leaving an orphaned keymap entry."
+msgstr ""
+
