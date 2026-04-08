@@ -48,6 +48,24 @@ class ChapterPlayer(xbmc.Player):
         except ValueError:
             self._trigger_button = 0
 
+    def reload_settings(self):
+        """Re-read settings and reconcile keymap state. Called by ChapterMonitor
+        when the user changes any addon setting."""
+        old_mode = self._trigger_mode
+        old_button = self._trigger_button
+        self._load_trigger_settings()
+        # Re-read duration since it can change live too
+        addon = xbmcaddon.Addon("service.chapternotify")
+        try:
+            self._duration = int(addon.getSetting("duration") or "5")
+        except ValueError:
+            self._duration = 5
+        if (self._trigger_mode != old_mode) or (self._trigger_button != old_button):
+            log.info("Trigger settings changed",
+                     event="settings.trigger.change",
+                     mode=self._trigger_mode, button=self._trigger_button)
+            keymap.sync(self._trigger_mode, self._trigger_button)
+
     def get_tick_interval_ms(self):
         """Adaptive tick interval: 250ms in Manual/Both for responsive button trigger,
         1000ms in Auto-only to minimize wakeups."""
@@ -215,3 +233,15 @@ class ChapterPlayer(xbmc.Player):
         except Exception as e:
             log.error("Manual trigger: overlay failed",
                       event="manual.error", error=str(e))
+
+
+class ChapterMonitor(xbmc.Monitor):
+    """Monitor subclass that forwards onSettingsChanged to the player."""
+
+    def __init__(self, player):
+        super().__init__()
+        self._player = player
+
+    def onSettingsChanged(self):
+        log.debug("Settings changed", event="settings.changed")
+        self._player.reload_settings()
