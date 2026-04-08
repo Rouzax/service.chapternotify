@@ -88,15 +88,22 @@ class ChapterPlayer(xbmc.Player):
         self._deactivate()
 
     def tick(self):
-        """Called from the main service loop every ~1 second."""
-        if not self._active:
-            return
-
-        # Auto-hide overlay after duration
+        """Called from the main service loop on an adaptive interval."""
+        # 1. Auto-hide expired overlay (regardless of mode)
         if self._overlay is not None:
             if time.time() - self._overlay_show_time >= self._duration:
                 self._dismiss_overlay()
 
+        # 2. Handle manual trigger if Manual or Both mode
+        if self._trigger_mode in (MODE_MANUAL, MODE_BOTH):
+            self._handle_manual_trigger()
+
+        # 3. Auto chapter detection: only if Auto/Both AND on a monitored path
+        if self._trigger_mode in (MODE_AUTO, MODE_BOTH) and self._active:
+            self._poll_chapter_change()
+
+    def _poll_chapter_change(self):
+        """Existing auto chapter-change detection, extracted from tick()."""
         chapter_info = get_current_chapter()
         if chapter_info is None:
             return
@@ -115,7 +122,8 @@ class ChapterPlayer(xbmc.Player):
                 self._overlay = create_chapter_overlay(parsed)
                 self._overlay_show_time = time.time()
             except Exception as e:
-                log.error("Failed to show overlay", event="overlay.error", error=str(e))
+                log.error("Failed to show overlay",
+                          event="overlay.error", error=str(e))
 
     def _matches_configured_path(self, filepath):
         addon = xbmcaddon.Addon("service.chapternotify")
