@@ -203,16 +203,24 @@ class ChapterPlayer(xbmc.Player):
         self._on_manual_trigger()
 
     def _on_manual_trigger(self):
-        """Toggle: if overlay is showing, dismiss. Otherwise show current chapter
-        info regardless of monitored-path filter. Silent no-op if no chapter info.
+        """Show overlay, or refresh its timer if already visible.
+
+        Never dismisses via the trigger key - that would create friction in
+        normal use where the user presses the key to "see chapter info" and
+        gets surprised by the overlay disappearing instead. To dismiss
+        manually, press any other key (the overlay's onAction handler
+        closes the dialog instantly).
+
+        Bypasses the monitored-path filter so the user can summon chapter
+        info on any media that has chapters.
         """
-        # Toggle off if already visible
+        # If overlay is already visible, just reset the timer (extend display)
         if self._overlay is not None:
-            log.debug("Manual trigger: toggling off", event="manual.toggle.off")
-            self._dismiss_overlay()
+            log.debug("Manual trigger: refreshing timer",
+                      event="manual.refresh")
+            self._overlay_show_time = time.time()
             return
 
-        # Show: fetch chapter info regardless of path filter
         chapter_info = get_current_chapter()
         if chapter_info is None:
             log.debug("Manual trigger: no chapter info available",
