@@ -16,40 +16,78 @@ from resources.lib import log
 KEYMAP_DIR = xbmcvfs.translatePath("special://userdata/keymaps/")
 KEYMAP_FILE = KEYMAP_DIR + "service.chapternotify.xml"
 
-# Color name -> (remote tag, keyboard key id)
-# Key ids are Kodi's full button codes: KEY_VKEY (0xF000) | XBMCVK_Fn.
-# Verified against xbmc/input/keyboard/XBMC_vkeys.h and
-# xbmc/input/keymaps/keyboard/KeyboardTranslator.cpp in Kodi 21 (Omega).
+# Button name -> spec dict with "keyboard" tag (required) and optional "remote" tag.
+# Keyboard tags are Kodi keymap names from xbmc/input/keymaps/keyboard/KeyboardTranslator.cpp.
+# All entries are verified free in <FullscreenVideo> against system/keymaps/keyboard.xml
+# in Kodi 21 (Omega). F8/F9/F10 are intentionally excluded - they're bound globally to
+# Mute/VolumeDown/VolumeUp. F11 is bound globally to HDRToggle.
 _BUTTONS = {
-    "yellow": ("yellow", 61591),  # F8 = 0xF000 | 0x97
-    "red":    ("red",    61588),  # F5 = 0xF000 | 0x94
-    "green":  ("green",  61589),  # F6 = 0xF000 | 0x95
-    "blue":   ("blue",   61590),  # F7 = 0xF000 | 0x96
+    # Color buttons - bound on both <keyboard> (rare keyboards with color keys)
+    # and <remote> (CEC, MCE remotes that send color codes). Many remotes including
+    # Logitech Harmony do NOT send these, so they may not fire.
+    "yellow": {"keyboard": "yellow", "remote": "yellow"},
+    "red":    {"keyboard": "red",    "remote": "red"},
+    "green":  {"keyboard": "green",  "remote": "green"},
+    "blue":   {"keyboard": "blue",   "remote": "blue"},
+    # F-keys - reliably free in FullscreenVideo. Programmable remotes (Harmony, Flirc)
+    # can be configured to send these.
+    "f1":  {"keyboard": "f1"},
+    "f2":  {"keyboard": "f2"},
+    "f3":  {"keyboard": "f3"},
+    "f4":  {"keyboard": "f4"},
+    "f5":  {"keyboard": "f5"},
+    "f6":  {"keyboard": "f6"},
+    "f7":  {"keyboard": "f7"},
+    "f12": {"keyboard": "f12"},
+    # Letter keys - free in default FullscreenVideo. Excludes letters bound by default
+    # (f, r, m, i, o, z, t, l, a, c, v, b) and common user customizations.
+    "e": {"keyboard": "e"},
+    "h": {"keyboard": "h"},
+    "j": {"keyboard": "j"},
+    "k": {"keyboard": "k"},
+    "p": {"keyboard": "p"},
+    "s": {"keyboard": "s"},
+    "u": {"keyboard": "u"},
+    "w": {"keyboard": "w"},
+    "x": {"keyboard": "x"},
+    "y": {"keyboard": "y"},
 }
-
-_TEMPLATE = """\
-<keymap>
-  <FullscreenVideo>
-    <keyboard>
-      <key id="{key_id}">RunScript(service.chapternotify,show)</key>
-    </keyboard>
-    <remote>
-      <{tag}>RunScript(service.chapternotify,show)</{tag}>
-    </remote>
-  </FullscreenVideo>
-</keymap>
-"""
 
 
 def _render(button):
-    """Render the keymap XML for the given color button.
+    """Render the keymap XML for the given button.
+
+    Generates a <FullscreenVideo>-scoped binding with a <keyboard> entry and an
+    optional <remote> entry depending on the button spec.
 
     Raises ValueError for unknown buttons.
     """
-    if button not in _BUTTONS:
+    spec = _BUTTONS.get(button)
+    if spec is None:
         raise ValueError("Unknown button: {}".format(button))
-    tag, key_id = _BUTTONS[button]
-    return _TEMPLATE.format(key_id=key_id, tag=tag)
+
+    kb_tag = spec["keyboard"]
+    remote_tag = spec.get("remote")
+
+    lines = [
+        "<keymap>",
+        "  <FullscreenVideo>",
+        "    <keyboard>",
+        "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=kb_tag),
+        "    </keyboard>",
+    ]
+    if remote_tag:
+        lines.extend([
+            "    <remote>",
+            "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=remote_tag),
+            "    </remote>",
+        ])
+    lines.extend([
+        "  </FullscreenVideo>",
+        "</keymap>",
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def is_installed():
@@ -120,7 +158,11 @@ def reload():
 
 
 # Index -> button name (matches settings.xml option order)
-_BUTTON_BY_INDEX = ["yellow", "red", "green", "blue"]
+_BUTTON_BY_INDEX = [
+    "yellow", "red", "green", "blue",
+    "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f12",
+    "e", "h", "j", "k", "p", "s", "u", "w", "x", "y",
+]
 
 # Mode constants (mirror player.py for clarity in tests)
 MODE_AUTO = 0

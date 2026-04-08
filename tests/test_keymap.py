@@ -7,8 +7,10 @@ from resources.lib import keymap
 
 def test_render_yellow_button():
     xml = keymap._render("yellow")
+    # Color buttons get both keyboard and remote bindings
+    assert "<keyboard>" in xml
     assert "<yellow>RunScript(service.chapternotify,show)</yellow>" in xml
-    assert '<key id="61591">RunScript(service.chapternotify,show)</key>' in xml
+    assert "<remote>" in xml
     assert "<FullscreenVideo>" in xml
     assert "</keymap>" in xml
 
@@ -16,19 +18,39 @@ def test_render_yellow_button():
 def test_render_red_button():
     xml = keymap._render("red")
     assert "<red>RunScript(service.chapternotify,show)</red>" in xml
-    assert '<key id="61588">RunScript(service.chapternotify,show)</key>' in xml
+    assert "<remote>" in xml
 
 
 def test_render_green_button():
     xml = keymap._render("green")
     assert "<green>RunScript(service.chapternotify,show)</green>" in xml
-    assert '<key id="61589">RunScript(service.chapternotify,show)</key>' in xml
+    assert "<remote>" in xml
 
 
 def test_render_blue_button():
     xml = keymap._render("blue")
     assert "<blue>RunScript(service.chapternotify,show)</blue>" in xml
-    assert '<key id="61590">RunScript(service.chapternotify,show)</key>' in xml
+    assert "<remote>" in xml
+
+
+def test_render_f1_keyboard_only():
+    # F-keys are keyboard-only, no <remote> section emitted
+    xml = keymap._render("f1")
+    assert "<f1>RunScript(service.chapternotify,show)</f1>" in xml
+    assert "<keyboard>" in xml
+    assert "<remote>" not in xml
+
+
+def test_render_f12_keyboard_only():
+    xml = keymap._render("f12")
+    assert "<f12>RunScript(service.chapternotify,show)</f12>" in xml
+    assert "<remote>" not in xml
+
+
+def test_render_letter_keyboard_only():
+    xml = keymap._render("p")
+    assert "<p>RunScript(service.chapternotify,show)</p>" in xml
+    assert "<remote>" not in xml
 
 
 def test_render_unknown_button_raises():
@@ -63,7 +85,7 @@ def test_install_writes_file(tmp_path):
         assert ok is True
         content = (tmp_path / "service.chapternotify.xml").read_text()
         assert "<yellow>" in content
-        assert '<key id="61591">' in content
+        assert "<remote>" in content
         ebi.assert_called_once_with("Action(reloadkeymaps)")
 
 
