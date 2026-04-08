@@ -4,9 +4,16 @@
 
 Owns the full lifecycle: install, remove, sync to settings. Never reads,
 parses, or modifies any other keymap file.
+
+The trigger key is a free-form Kodi keymap tag (e.g. "f1", "yellow", "p",
+"browser_back"). The user is responsible for picking a key their input
+device actually sends and that does not collide with their other bindings.
+The binding is scoped to <FullscreenVideo> only, so collisions outside
+playback are limited to whatever Kodi action is normally bound to that key.
 """
 
 import os
+import re
 
 import xbmc
 import xbmcvfs
@@ -16,70 +23,57 @@ from resources.lib import log
 KEYMAP_DIR = xbmcvfs.translatePath("special://userdata/keymaps/")
 KEYMAP_FILE = KEYMAP_DIR + "service.chapternotify.xml"
 
-# Button name -> spec dict with "keyboard" tag (required) and optional "remote" tag.
-# Keyboard tags are Kodi keymap names from xbmc/input/keymaps/keyboard/KeyboardTranslator.cpp.
-# All entries are verified free in <FullscreenVideo> against system/keymaps/keyboard.xml
-# in Kodi 21 (Omega). F8/F9/F10 are intentionally excluded - they're bound globally to
-# Mute/VolumeDown/VolumeUp. F11 is bound globally to HDRToggle.
-_BUTTONS = {
-    # Color buttons - bound on both <keyboard> (rare keyboards with color keys)
-    # and <remote> (CEC, MCE remotes that send color codes). Many remotes including
-    # Logitech Harmony do NOT send these, so they may not fire.
-    "yellow": {"keyboard": "yellow", "remote": "yellow"},
-    "red":    {"keyboard": "red",    "remote": "red"},
-    "green":  {"keyboard": "green",  "remote": "green"},
-    "blue":   {"keyboard": "blue",   "remote": "blue"},
-    # F-keys - reliably free in FullscreenVideo. Programmable remotes (Harmony, Flirc)
-    # can be configured to send these.
-    "f1":  {"keyboard": "f1"},
-    "f2":  {"keyboard": "f2"},
-    "f3":  {"keyboard": "f3"},
-    "f4":  {"keyboard": "f4"},
-    "f5":  {"keyboard": "f5"},
-    "f6":  {"keyboard": "f6"},
-    "f7":  {"keyboard": "f7"},
-    "f12": {"keyboard": "f12"},
-    # Letter keys - free in default FullscreenVideo. Excludes letters bound by default
-    # (f, r, m, i, o, z, t, l, a, c, v, b) and common user customizations.
-    "e": {"keyboard": "e"},
-    "h": {"keyboard": "h"},
-    "j": {"keyboard": "j"},
-    "k": {"keyboard": "k"},
-    "p": {"keyboard": "p"},
-    "s": {"keyboard": "s"},
-    "u": {"keyboard": "u"},
-    "w": {"keyboard": "w"},
-    "x": {"keyboard": "x"},
-    "y": {"keyboard": "y"},
-}
+# Mode constants (mirror player.py for clarity in tests)
+MODE_AUTO = 0
+MODE_MANUAL = 1
+MODE_BOTH = 2
+
+DEFAULT_KEY = "f1"
+
+# Color buttons get an additional <remote> binding because some remotes
+# (CEC, MCE) send them through the remote input path rather than as
+# keyboard scancodes. All other keys are keyboard-only.
+_COLOR_KEYS = {"yellow", "red", "green", "blue"}
+
+# Validates that a key name is safe to embed in XML and matches the
+# Kodi keymap tag conventions: lowercase letters, digits, underscore.
+# This intentionally rejects punctuation, dashes, and uppercase to keep
+# the surface area small and predictable.
+_KEY_PATTERN = re.compile(r"^[a-z0-9_]+$")
 
 
-def _render(button):
-    """Render the keymap XML for the given button.
+def normalize_key(key):
+    """Lowercase, strip whitespace, and validate. Returns DEFAULT_KEY if invalid."""
+    if not isinstance(key, str):
+        return DEFAULT_KEY
+    key = key.strip().lower()
+    if not key or not _KEY_PATTERN.match(key):
+        return DEFAULT_KEY
+    return key
 
-    Generates a <FullscreenVideo>-scoped binding with a <keyboard> entry and an
-    optional <remote> entry depending on the button spec.
 
-    Raises ValueError for unknown buttons.
+def _render(key):
+    """Render the keymap XML for the given key name.
+
+    Generates a <FullscreenVideo>-scoped binding with a <keyboard> entry and
+    an additional <remote> entry only for the four color buttons.
+
+    The key is normalized; invalid input falls back to DEFAULT_KEY rather
+    than raising, so a bad setting can never crash the service.
     """
-    spec = _BUTTONS.get(button)
-    if spec is None:
-        raise ValueError("Unknown button: {}".format(button))
-
-    kb_tag = spec["keyboard"]
-    remote_tag = spec.get("remote")
+    key = normalize_key(key)
 
     lines = [
         "<keymap>",
         "  <FullscreenVideo>",
         "    <keyboard>",
-        "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=kb_tag),
+        "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=key),
         "    </keyboard>",
     ]
-    if remote_tag:
+    if key in _COLOR_KEYS:
         lines.extend([
             "    <remote>",
-            "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=remote_tag),
+            "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=key),
             "    </remote>",
         ])
     lines.extend([
@@ -95,18 +89,13 @@ def is_installed():
     return os.path.exists(KEYMAP_FILE)
 
 
-def install(button):
-    """Write the keymap file for the given button and reload Kodi keymaps.
+def install(key):
+    """Write the keymap file for the given key name and reload Kodi keymaps.
 
-    Returns True on success, False on failure (unknown button or filesystem error).
-    Idempotent: always overwrites the existing file completely; never appends.
+    Returns True on success, False on filesystem error. Idempotent: always
+    overwrites the existing file completely; never appends.
     """
-    try:
-        content = _render(button)
-    except ValueError as e:
-        log.error("keymap install: unknown button",
-                  event="keymap.install.fail", error=str(e))
-        return False
+    content = _render(key)
 
     try:
         if not os.path.exists(KEYMAP_DIR):
@@ -118,7 +107,7 @@ def install(button):
                   event="keymap.install.fail", error=str(e))
         return False
 
-    log.info("keymap installed", event="keymap.install.ok", button=button)
+    log.info("keymap installed", event="keymap.install.ok", key=normalize_key(key))
     reload()
     return True
 
@@ -157,20 +146,7 @@ def reload():
                   event="keymap.reload.fail", error=str(e))
 
 
-# Index -> button name (matches settings.xml option order)
-_BUTTON_BY_INDEX = [
-    "yellow", "red", "green", "blue",
-    "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f12",
-    "e", "h", "j", "k", "p", "s", "u", "w", "x", "y",
-]
-
-# Mode constants (mirror player.py for clarity in tests)
-MODE_AUTO = 0
-MODE_MANUAL = 1
-MODE_BOTH = 2
-
-
-def sync(mode, button):
+def sync(mode, key):
     """Reconcile the keymap file with desired settings state.
 
     Idempotent: only writes/removes when the current state does not match
@@ -186,22 +162,18 @@ def sync(mode, button):
             remove()
         return
 
-    if 0 <= button < len(_BUTTON_BY_INDEX):
-        button_name = _BUTTON_BY_INDEX[button]
-    else:
-        button_name = "yellow"
+    key = normalize_key(key)
 
-    # If installed, check whether the current button matches what we want.
+    # If installed, check whether the current key matches what we want.
     if is_installed():
         try:
             with open(KEYMAP_FILE, "r") as f:
                 current = f.read()
-            if "<{}>".format(button_name) in current:
-                # Already correct, no-op
-                return
+            if "<{}>".format(key) in current:
+                return  # Already correct, no-op
         except (OSError, IOError):
             pass  # Fall through to reinstall
 
     log.debug("keymap sync: installing", event="keymap.sync",
-              mode=mode, button=button_name, action="install")
-    install(button_name)
+              mode=mode, key=key, action="install")
+    install(key)

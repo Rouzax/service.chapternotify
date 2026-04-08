@@ -233,84 +233,12 @@ msgctxt "#32123"
 msgid "Blue"
 msgstr ""
 
-msgctxt "#32124"
-msgid "F1"
-msgstr ""
-
-msgctxt "#32125"
-msgid "F2"
-msgstr ""
-
-msgctxt "#32126"
-msgid "F3"
-msgstr ""
-
-msgctxt "#32127"
-msgid "F4"
-msgstr ""
-
-msgctxt "#32128"
-msgid "F5"
-msgstr ""
-
-msgctxt "#32129"
-msgid "F6"
-msgstr ""
-
-msgctxt "#32130"
-msgid "F7"
-msgstr ""
-
-msgctxt "#32131"
-msgid "F12"
-msgstr ""
-
-msgctxt "#32132"
-msgid "E"
-msgstr ""
-
-msgctxt "#32133"
-msgid "H"
-msgstr ""
-
-msgctxt "#32134"
-msgid "J"
-msgstr ""
-
-msgctxt "#32135"
-msgid "K"
-msgstr ""
-
-msgctxt "#32136"
-msgid "P"
-msgstr ""
-
-msgctxt "#32137"
-msgid "S"
-msgstr ""
-
-msgctxt "#32138"
-msgid "U"
-msgstr ""
-
-msgctxt "#32139"
-msgid "W"
-msgstr ""
-
-msgctxt "#32140"
-msgid "X"
-msgstr ""
-
-msgctxt "#32141"
-msgid "Y"
-msgstr ""
-
 msgctxt "#32151"
-msgid "Auto: notifications appear on chapter change for the library paths above. Manual: notifications appear only when you press the configured button (works for any media with chapters, not just the library paths). Both: combines Auto and Manual."
+msgid "Auto: notifications appear on chapter change for the library paths above. Manual: notifications appear only when you press the configured key (works for any media with chapters, not just the library paths). Both: combines Auto and Manual."
 msgstr ""
 
 msgctxt "#32152"
-msgid "Choose which key summons the chapter notification during fullscreen video. Color buttons (Yellow/Red/Green/Blue) only work on remotes that send those codes (some Logitech Harmony remotes do not). F-keys and letter keys are reliably free in fullscreen video and can be sent by any programmable remote or keyboard. Make sure the chosen key is not already bound by your skin or other addons."
+msgid "Type the Kodi keyboard tag your remote sends when you press the button you want to use. Examples: f1, yellow, p, browser_back. To find what your remote sends, enable Kodi debug logging and watch kodi.log for 'Keyboard' events while pressing the button. Only lowercase letters, digits, and underscores are accepted. The binding is scoped to fullscreen video so it will not interfere with menu navigation."
 msgstr ""
 
 msgctxt "#32153"

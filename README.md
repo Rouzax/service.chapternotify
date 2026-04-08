@@ -58,7 +58,7 @@ The overlay appears for a configurable duration, then slides or fades away. Any 
 |---------|---------|-------------|
 | Library paths (1-3) | - | Folders to monitor for chapter notifications |
 | Trigger mode | Auto | Auto, Manual, or Both (see below) |
-| Trigger button | Yellow | Which color button summons the overlay (Manual/Both only) |
+| Trigger key | f1 | Kodi keyboard tag the remote sends to summon the overlay (Manual/Both only) |
 | Display duration | 10 seconds | How long the overlay stays on screen |
 | Animation style | Slide | Fade or slide transitions |
 | Position | Top left | Where the overlay appears |
@@ -73,12 +73,24 @@ The overlay appears for a configurable duration, then slides or fades away. Any 
 You can choose how the chapter overlay is summoned in **Settings > General > Trigger**:
 
 - **Auto** (default) - The overlay appears automatically when a chapter changes during playback from a configured library path. This is the original v0.5.1 behavior.
-- **Manual** - The overlay appears only when you press a chosen color button (Yellow, Red, Green, or Blue) on your remote during fullscreen video. The library path filter is bypassed, so you can summon chapter info on any media that has chapters. Press the same button again to dismiss the overlay.
-- **Both** - The overlay appears automatically on chapter changes AND can be summoned manually with the button.
+- **Manual** - The overlay appears only when you press the configured key during fullscreen video. The library path filter is bypassed, so you can summon chapter info on any media that has chapters. Press the same key again to dismiss the overlay.
+- **Both** - The overlay appears automatically on chapter changes AND can be summoned manually with the key.
+
+### Configuring the trigger key
+
+The **Trigger key** setting takes a Kodi keyboard tag (e.g. `f1`, `yellow`, `p`, `browser_back`). The default is `f1`, which is reliably free in Kodi 21 and works on any keyboard. For programmable remotes (Logitech Harmony, Flirc, etc.) you can pick any key your remote can send, then configure your remote to send that key.
+
+**Common safe options:**
+- `f1`, `f2`, `f3`, `f4`, `f5`, `f6`, `f7`, `f12` - F-keys with no default Kodi bindings
+- `yellow`, `red`, `green`, `blue` - color buttons (only work on remotes that send these codes via CEC or MCE; many remotes do not)
+
+**Avoid:**
+- `f8` (Mute), `f9` (Volume Down), `f10` (Volume Up), `f11` (HDR Toggle) - bound globally
+- Letter keys - most are bound to global Kodi actions like PVR or playback control. They will work inside fullscreen video (because our binding overrides the global one in that scope) but will trigger the wrong action in the home menu and elsewhere.
+
+**To find what your remote sends:** enable Kodi debug logging and watch `kodi.log` for `Keyboard` events while you press the button you want to use.
 
 When you choose Manual or Both, the addon installs a small keymap file at `userdata/keymaps/service.chapternotify.xml` scoped to fullscreen video. The binding only fires during fullscreen video playback and never affects other Kodi screens. To remove the binding cleanly, click **Remove keymap binding** in settings.
-
-The keymap binds both the remote color button (e.g. `<yellow>`) and its corresponding keyboard F-key (Yellow=F8, Red=F5, Green=F6, Blue=F7), so the trigger works on both remotes and keyboards.
 
 **Before downgrading** to v0.5.1, click **Remove keymap binding** to avoid leaving an orphaned binding behind.
 

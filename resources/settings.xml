@@ -59,36 +59,13 @@
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
-                <setting id="trigger_button" type="integer" label="32102" help="32152">
+                <setting id="trigger_key" type="string" label="32102" help="32152">
                     <level>0</level>
-                    <default>4</default>
+                    <default>f1</default>
                     <constraints>
-                        <options>
-                            <option label="32120">0</option>
-                            <option label="32121">1</option>
-                            <option label="32122">2</option>
-                            <option label="32123">3</option>
-                            <option label="32124">4</option>
-                            <option label="32125">5</option>
-                            <option label="32126">6</option>
-                            <option label="32127">7</option>
-                            <option label="32128">8</option>
-                            <option label="32129">9</option>
-                            <option label="32130">10</option>
-                            <option label="32131">11</option>
-                            <option label="32132">12</option>
-                            <option label="32133">13</option>
-                            <option label="32134">14</option>
-                            <option label="32135">15</option>
-                            <option label="32136">16</option>
-                            <option label="32137">17</option>
-                            <option label="32138">18</option>
-                            <option label="32139">19</option>
-                            <option label="32140">20</option>
-                            <option label="32141">21</option>
-                        </options>
+                        <allowempty>false</allowempty>
                     </constraints>
-                    <control type="spinner" format="string"/>
+                    <control type="edit" format="string"/>
                     <dependencies>
                         <dependency type="enable" setting="trigger_mode" operator="!is">0</dependency>
                     </dependencies>

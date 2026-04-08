@@ -5,9 +5,39 @@ from unittest.mock import patch
 from resources.lib import keymap
 
 
-def test_render_yellow_button():
+# ----- normalize_key -----
+
+def test_normalize_key_lowercases():
+    assert keymap.normalize_key("F1") == "f1"
+
+
+def test_normalize_key_strips_whitespace():
+    assert keymap.normalize_key("  yellow  ") == "yellow"
+
+
+def test_normalize_key_falls_back_on_empty():
+    assert keymap.normalize_key("") == keymap.DEFAULT_KEY
+
+
+def test_normalize_key_falls_back_on_none():
+    assert keymap.normalize_key(None) == keymap.DEFAULT_KEY
+
+
+def test_normalize_key_rejects_punctuation():
+    assert keymap.normalize_key("a-b") == keymap.DEFAULT_KEY
+    assert keymap.normalize_key("foo!") == keymap.DEFAULT_KEY
+    assert keymap.normalize_key("<yellow>") == keymap.DEFAULT_KEY
+
+
+def test_normalize_key_accepts_underscore_and_digits():
+    assert keymap.normalize_key("browser_back") == "browser_back"
+    assert keymap.normalize_key("f12") == "f12"
+
+
+# ----- _render -----
+
+def test_render_yellow_emits_keyboard_and_remote():
     xml = keymap._render("yellow")
-    # Color buttons get both keyboard and remote bindings
     assert "<keyboard>" in xml
     assert "<yellow>RunScript(service.chapternotify,show)</yellow>" in xml
     assert "<remote>" in xml
@@ -15,26 +45,23 @@ def test_render_yellow_button():
     assert "</keymap>" in xml
 
 
-def test_render_red_button():
+def test_render_red_emits_remote():
     xml = keymap._render("red")
     assert "<red>RunScript(service.chapternotify,show)</red>" in xml
     assert "<remote>" in xml
 
 
-def test_render_green_button():
+def test_render_green_emits_remote():
     xml = keymap._render("green")
-    assert "<green>RunScript(service.chapternotify,show)</green>" in xml
     assert "<remote>" in xml
 
 
-def test_render_blue_button():
+def test_render_blue_emits_remote():
     xml = keymap._render("blue")
-    assert "<blue>RunScript(service.chapternotify,show)</blue>" in xml
     assert "<remote>" in xml
 
 
 def test_render_f1_keyboard_only():
-    # F-keys are keyboard-only, no <remote> section emitted
     xml = keymap._render("f1")
     assert "<f1>RunScript(service.chapternotify,show)</f1>" in xml
     assert "<keyboard>" in xml
@@ -53,11 +80,12 @@ def test_render_letter_keyboard_only():
     assert "<remote>" not in xml
 
 
-def test_render_unknown_button_raises():
-    import pytest
-    with pytest.raises(ValueError):
-        keymap._render("purple")
+def test_render_invalid_falls_back_to_default():
+    xml = keymap._render("a-b")
+    assert "<{}>".format(keymap.DEFAULT_KEY) in xml
 
+
+# ----- filesystem -----
 
 def _patch_keymap_dir(tmpdir):
     """Helper to point keymap module at a temp directory for the duration of a test."""
@@ -108,6 +136,16 @@ def test_install_overwrites_existing(tmp_path):
         assert "<green>" in content
 
 
+def test_install_invalid_key_writes_default(tmp_path):
+    """Invalid input is normalized to DEFAULT_KEY rather than raising."""
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin"):
+        ok = keymap.install("a-b")
+        assert ok is True
+        content = (tmp_path / "service.chapternotify.xml").read_text()
+        assert "<{}>".format(keymap.DEFAULT_KEY) in content
+
+
 def test_remove_deletes_file(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     (tmp_path / "service.chapternotify.xml").write_text("<keymap></keymap>")
@@ -122,37 +160,31 @@ def test_remove_noop_when_missing(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin") as ebi:
         ok = keymap.remove()
-        assert ok is True  # treated as success
-        ebi.assert_not_called()  # no need to reload
+        assert ok is True
+        ebi.assert_not_called()
 
 
-def test_install_unknown_button_returns_false(tmp_path):
-    p1, p2 = _patch_keymap_dir(str(tmp_path))
-    with p1, p2:
-        ok = keymap.install("purple")
-        assert ok is False
-        assert not (tmp_path / "service.chapternotify.xml").exists()
-
+# ----- sync -----
 
 def test_sync_auto_mode_removes_existing(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     (tmp_path / "service.chapternotify.xml").write_text("<keymap></keymap>")
     with p1, p2, patch("xbmc.executebuiltin"):
-        keymap.sync(mode=0, button=0)  # 0 = Auto
+        keymap.sync(mode=0, key="yellow")
         assert not (tmp_path / "service.chapternotify.xml").exists()
 
 
 def test_sync_auto_mode_noop_when_already_absent(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin") as ebi:
-        keymap.sync(mode=0, button=0)
+        keymap.sync(mode=0, key="yellow")
         ebi.assert_not_called()
 
 
 def test_sync_manual_mode_installs_when_missing(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin"):
-        keymap.sync(mode=1, button=0)  # 1 = Manual, 0 = Yellow
+        keymap.sync(mode=1, key="yellow")
         content = (tmp_path / "service.chapternotify.xml").read_text()
         assert "<yellow>" in content
 
@@ -160,7 +192,7 @@ def test_sync_manual_mode_installs_when_missing(tmp_path):
 def test_sync_both_mode_installs(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin"):
-        keymap.sync(mode=2, button=1)  # 2 = Both, 1 = Red
+        keymap.sync(mode=2, key="red")
         content = (tmp_path / "service.chapternotify.xml").read_text()
         assert "<red>" in content
 
@@ -168,18 +200,18 @@ def test_sync_both_mode_installs(tmp_path):
 def test_sync_manual_mode_noop_when_already_correct(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin"):
-        keymap.sync(mode=1, button=0)
+        keymap.sync(mode=1, key="yellow")
     with p1, p2, patch("xbmc.executebuiltin") as ebi:
-        keymap.sync(mode=1, button=0)
+        keymap.sync(mode=1, key="yellow")
         ebi.assert_not_called()
 
 
-def test_sync_button_change_rewrites(tmp_path):
+def test_sync_key_change_rewrites(tmp_path):
     p1, p2 = _patch_keymap_dir(str(tmp_path))
     with p1, p2, patch("xbmc.executebuiltin"):
-        keymap.sync(mode=1, button=0)  # Yellow
+        keymap.sync(mode=1, key="yellow")
     with p1, p2, patch("xbmc.executebuiltin") as ebi:
-        keymap.sync(mode=1, button=2)  # Green
+        keymap.sync(mode=1, key="green")
         content = (tmp_path / "service.chapternotify.xml").read_text()
         assert "<green>" in content
         assert "<yellow>" not in content

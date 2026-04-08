@@ -27,7 +27,7 @@ class ChapterPlayer(xbmc.Player):
         self._overlay_show_time = 0
         self._duration = 5
         self._trigger_mode = MODE_AUTO
-        self._trigger_button = 0
+        self._trigger_key = keymap.DEFAULT_KEY
         self._last_trigger_ts = 0
         self._load_trigger_settings()
         # Clear any stale trigger property from a previous session
@@ -35,7 +35,7 @@ class ChapterPlayer(xbmc.Player):
             xbmcgui.Window(10000).clearProperty(TRIGGER_PROPERTY)
         except Exception:
             pass
-        keymap.sync(self._trigger_mode, self._trigger_button)
+        keymap.sync(self._trigger_mode, self._trigger_key)
 
     def _load_trigger_settings(self):
         addon = xbmcaddon.Addon("service.chapternotify")
@@ -43,16 +43,15 @@ class ChapterPlayer(xbmc.Player):
             self._trigger_mode = int(addon.getSetting("trigger_mode") or "0")
         except ValueError:
             self._trigger_mode = MODE_AUTO
-        try:
-            self._trigger_button = int(addon.getSetting("trigger_button") or "0")
-        except ValueError:
-            self._trigger_button = 0
+        self._trigger_key = keymap.normalize_key(
+            addon.getSetting("trigger_key") or keymap.DEFAULT_KEY
+        )
 
     def reload_settings(self):
         """Re-read settings and reconcile keymap state. Called by ChapterMonitor
         when the user changes any addon setting."""
         old_mode = self._trigger_mode
-        old_button = self._trigger_button
+        old_key = self._trigger_key
         self._load_trigger_settings()
         # Re-read duration since it can change live too
         addon = xbmcaddon.Addon("service.chapternotify")
@@ -60,11 +59,11 @@ class ChapterPlayer(xbmc.Player):
             self._duration = int(addon.getSetting("duration") or "5")
         except ValueError:
             self._duration = 5
-        if (self._trigger_mode != old_mode) or (self._trigger_button != old_button):
+        if (self._trigger_mode != old_mode) or (self._trigger_key != old_key):
             log.info("Trigger settings changed",
                      event="settings.trigger.change",
-                     mode=self._trigger_mode, button=self._trigger_button)
-            keymap.sync(self._trigger_mode, self._trigger_button)
+                     mode=self._trigger_mode, key=self._trigger_key)
+            keymap.sync(self._trigger_mode, self._trigger_key)
 
     def get_tick_interval_ms(self):
         """Adaptive tick interval: 250ms in Manual/Both for responsive button trigger,
