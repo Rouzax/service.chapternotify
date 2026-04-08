@@ -1,6 +1,60 @@
 Chapter Notify Changelog
 ========================
 
+v0.6.0 (2026-04-08)
+--------------------------
+New Features:
+  - Manual trigger mode. The chapter overlay can now be summoned on demand by
+    pressing a configurable key during playback, in addition to (or instead of)
+    the automatic chapter-change trigger. Three trigger modes available in the
+    new "Trigger" settings group:
+      * Auto (default) - matches v0.5.1 behavior, no change for upgraders
+      * Manual - overlay only appears when the trigger key is pressed
+      * Both - combines automatic chapter detection AND the manual trigger
+  - Free-form trigger key setting. Type any Kodi keyboard tag (f1, yellow, p,
+    browser_back, etc.) to bind it. Default is f1. Programmable remotes like
+    Logitech Harmony can be configured to send the chosen key.
+  - Manual trigger bypasses the library path filter. Press the key on any
+    media that has chapters to see the current chapter info, even if the file
+    is not in a configured library path.
+  - Each press of the trigger key always shows or replaces the overlay,
+    giving visible feedback every time. The overlay's open animation plays
+    on every press. To dismiss manually, press any other key.
+  - "Remove keymap binding" action button in settings for clean cleanup
+    before disabling or uninstalling the addon.
+
+Internal:
+  - New resources/lib/keymap.py module that owns the lifecycle of
+    userdata/keymaps/service.chapternotify.xml. Reconciles the file with
+    settings on startup and on settings change. Never reads or modifies any
+    other keymap file.
+  - Keymap binding is written in BOTH <FullscreenVideo> and <global> scopes.
+    Global is needed because while the overlay (a WindowXMLDialog) is on
+    screen, the active window context is the dialog itself, not
+    FullscreenVideo - so without a global binding the keymap lookup would
+    fall through to Kodi's default action for that key.
+  - IPC between default.py (fired by the keymap) and the running service
+    via a millisecond timestamp written to a Home window property. The
+    service polls the property on its tick loop, with a 3-second stale
+    threshold to discard old triggers from before the service started.
+  - Adaptive service tick interval: 250ms in Manual or Both mode for
+    responsive button trigger; 1000ms in Auto-only mode to minimize
+    wakeups for users who do not enable the manual trigger.
+  - Settings change callback via xbmc.Monitor.onSettingsChanged forwards
+    to a player.reload_settings() method that re-reads the trigger config
+    and reconciles the keymap file via keymap.sync().
+  - Pytest scaffolding added (tests/conftest.py mocks xbmc/xbmcgui/xbmcvfs)
+    with 35 unit tests covering keymap rendering, install/remove/sync
+    logic, and the manual trigger property handler.
+
+Notes:
+  - Default trigger_mode is Auto, so v0.5.1 upgraders see no behavior change.
+  - The trigger key is bound globally, but the handler is a silent no-op
+    when there is no active playback. Pressing the key in the home menu
+    or settings does nothing.
+  - Click "Remove keymap binding" before downgrading to v0.5.1 to avoid
+    leaving an orphaned binding behind.
+
 v0.5.1 (2026-04-07)
 --------------------------
 Bug Fixes:
