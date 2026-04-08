@@ -55,38 +55,52 @@ def normalize_key(key):
 def _render(key):
     """Render the keymap XML for the given key name.
 
-    Generates a <FullscreenVideo>-scoped binding with a <keyboard> entry and
-    an additional <remote> entry only for the four color buttons.
+    Generates bindings in BOTH <FullscreenVideo> and <global> scopes:
 
-    The binding is intentionally NOT global. Chapter notifications only make
-    sense during video playback, so the trigger should only fire there.
-    Outside playback the user's normal Kodi shortcuts continue to work
-    unmodified, even if the chosen key happens to have a default binding
-    elsewhere (e.g. e=TVGuide, p=Play).
+    - <FullscreenVideo> overrides any window-specific Kodi binding for that
+      key during normal playback (e.g. lets the user pick "a" even though
+      Kodi normally binds "a" to AudioDelay in FullscreenVideo).
+    - <global> is needed because while our overlay (a WindowXMLDialog) is
+      visible, the active window is the dialog itself, NOT FullscreenVideo.
+      Kodi's keymap lookup falls through to <global>, so without a global
+      binding the chosen key would trigger Kodi's default global action
+      (e.g. e=ActivateWindow(TVGuide)). Binding globally ensures our
+      action always wins regardless of which window is active.
+
+    Outside playback our manual trigger handler is a silent no-op (no
+    chapter info available), so global binding is safe: pressing the key
+    in the home menu does nothing instead of firing the wrong action.
+
+    Color buttons (yellow/red/green/blue) get an additional <remote> entry
+    in both scopes for CEC/MCE remotes that send them via the remote input
+    path rather than as keyboard scancodes.
 
     The key is normalized; invalid input falls back to DEFAULT_KEY rather
     than raising, so a bad setting can never crash the service.
     """
     key = normalize_key(key)
 
-    lines = [
-        "<keymap>",
-        "  <FullscreenVideo>",
-        "    <keyboard>",
-        "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=key),
-        "    </keyboard>",
-    ]
-    if key in _COLOR_KEYS:
-        lines.extend([
-            "    <remote>",
+    def _section(window_tag):
+        section = [
+            "  <{}>".format(window_tag),
+            "    <keyboard>",
             "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=key),
-            "    </remote>",
-        ])
-    lines.extend([
-        "  </FullscreenVideo>",
-        "</keymap>",
-        "",
-    ])
+            "    </keyboard>",
+        ]
+        if key in _COLOR_KEYS:
+            section.extend([
+                "    <remote>",
+                "      <{tag}>RunScript(service.chapternotify,show)</{tag}>".format(tag=key),
+                "    </remote>",
+            ])
+        section.append("  </{}>".format(window_tag))
+        return section
+
+    lines = ["<keymap>"]
+    lines.extend(_section("FullscreenVideo"))
+    lines.extend(_section("global"))
+    lines.append("</keymap>")
+    lines.append("")
     return "\n".join(lines)
 
 

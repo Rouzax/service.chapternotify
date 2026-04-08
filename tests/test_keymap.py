@@ -45,6 +45,18 @@ def test_render_yellow_emits_keyboard_and_remote():
     assert "</keymap>" in xml
 
 
+def test_render_emits_both_fullscreenvideo_and_global():
+    """Both scopes are needed: FullscreenVideo for normal playback context,
+    global for when our overlay dialog is the active window."""
+    xml = keymap._render("f1")
+    assert "<FullscreenVideo>" in xml
+    assert "</FullscreenVideo>" in xml
+    assert "<global>" in xml
+    assert "</global>" in xml
+    # The key tag should appear twice - once per scope
+    assert xml.count("<f1>RunScript(service.chapternotify,show)</f1>") == 2
+
+
 def test_render_red_emits_remote():
     xml = keymap._render("red")
     assert "<red>RunScript(service.chapternotify,show)</red>" in xml
