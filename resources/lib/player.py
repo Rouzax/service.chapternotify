@@ -203,29 +203,41 @@ class ChapterPlayer(xbmc.Player):
         self._on_manual_trigger()
 
     def _on_manual_trigger(self):
-        """Show overlay, or refresh its timer if already visible.
+        """Show a fresh overlay on every press.
 
-        Never dismisses via the trigger key - that would create friction in
-        normal use where the user presses the key to "see chapter info" and
-        gets surprised by the overlay disappearing instead. To dismiss
-        manually, press any other key (the overlay's onAction handler
-        closes the dialog instantly).
+        Always closes any existing overlay (instantly, no animation) and
+        opens a fresh one. This guarantees visible feedback on every press:
+        the user sees the overlay re-appear with its open animation, so they
+        always know their input was received.
+
+        Why not just refresh the timer? Refresh leaves the existing overlay
+        on screen unchanged, which the user perceives as "nothing happened".
+        Why not toggle? Toggle dismisses on the second press, which feels
+        like the button is broken when the user expected to see the overlay.
+
+        To dismiss manually, press any other key (the overlay's onAction
+        handler closes the dialog instantly).
 
         Bypasses the monitored-path filter so the user can summon chapter
         info on any media that has chapters.
         """
-        # If overlay is already visible, just reset the timer (extend display)
-        if self._overlay is not None:
-            log.debug("Manual trigger: refreshing timer",
-                      event="manual.refresh")
-            self._overlay_show_time = time.time()
-            return
-
         chapter_info = get_current_chapter()
         if chapter_info is None:
             log.debug("Manual trigger: no chapter info available",
                       event="manual.noinfo")
             return
+
+        # Instantly dismiss any existing overlay so the new one appears
+        # cleanly. quickclose=true skips the close animation.
+        if self._overlay is not None:
+            log.debug("Manual trigger: replacing overlay",
+                      event="manual.replace")
+            try:
+                self._overlay.setProperty("quickclose", "true")
+                self._overlay.close()
+            except RuntimeError:
+                pass
+            self._overlay = None
 
         parsed = parse_chapter_name(chapter_info["name"])
         log.info("Manual trigger: showing overlay",
