@@ -117,3 +117,49 @@ def reload():
     except Exception as e:
         log.error("keymap reload failed",
                   event="keymap.reload.fail", error=str(e))
+
+
+# Index -> button name (matches settings.xml option order)
+_BUTTON_BY_INDEX = ["yellow", "red", "green", "blue"]
+
+# Mode constants (mirror player.py for clarity in tests)
+MODE_AUTO = 0
+MODE_MANUAL = 1
+MODE_BOTH = 2
+
+
+def sync(mode, button):
+    """Reconcile the keymap file with desired settings state.
+
+    Idempotent: only writes/removes when the current state does not match
+    the desired state. Safe to call from startup and from settings-change
+    callbacks.
+    """
+    desired_installed = mode in (MODE_MANUAL, MODE_BOTH)
+
+    if not desired_installed:
+        if is_installed():
+            log.debug("keymap sync: removing", event="keymap.sync",
+                      mode=mode, action="remove")
+            remove()
+        return
+
+    if 0 <= button < len(_BUTTON_BY_INDEX):
+        button_name = _BUTTON_BY_INDEX[button]
+    else:
+        button_name = "yellow"
+
+    # If installed, check whether the current button matches what we want.
+    if is_installed():
+        try:
+            with open(KEYMAP_FILE, "r") as f:
+                current = f.read()
+            if "<{}>".format(button_name) in current:
+                # Already correct, no-op
+                return
+        except (OSError, IOError):
+            pass  # Fall through to reinstall
+
+    log.debug("keymap sync: installing", event="keymap.sync",
+              mode=mode, button=button_name, action="install")
+    install(button_name)

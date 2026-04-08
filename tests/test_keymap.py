@@ -110,3 +110,55 @@ def test_install_unknown_button_returns_false(tmp_path):
         ok = keymap.install("purple")
         assert ok is False
         assert not (tmp_path / "service.chapternotify.xml").exists()
+
+
+def test_sync_auto_mode_removes_existing(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    (tmp_path / "service.chapternotify.xml").write_text("<keymap></keymap>")
+    with p1, p2, patch("xbmc.executebuiltin"):
+        keymap.sync(mode=0, button=0)  # 0 = Auto
+        assert not (tmp_path / "service.chapternotify.xml").exists()
+
+
+def test_sync_auto_mode_noop_when_already_absent(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin") as ebi:
+        keymap.sync(mode=0, button=0)
+        ebi.assert_not_called()
+
+
+def test_sync_manual_mode_installs_when_missing(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin"):
+        keymap.sync(mode=1, button=0)  # 1 = Manual, 0 = Yellow
+        content = (tmp_path / "service.chapternotify.xml").read_text()
+        assert "<yellow>" in content
+
+
+def test_sync_both_mode_installs(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin"):
+        keymap.sync(mode=2, button=1)  # 2 = Both, 1 = Red
+        content = (tmp_path / "service.chapternotify.xml").read_text()
+        assert "<red>" in content
+
+
+def test_sync_manual_mode_noop_when_already_correct(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin"):
+        keymap.sync(mode=1, button=0)
+    with p1, p2, patch("xbmc.executebuiltin") as ebi:
+        keymap.sync(mode=1, button=0)
+        ebi.assert_not_called()
+
+
+def test_sync_button_change_rewrites(tmp_path):
+    p1, p2 = _patch_keymap_dir(str(tmp_path))
+    with p1, p2, patch("xbmc.executebuiltin"):
+        keymap.sync(mode=1, button=0)  # Yellow
+    with p1, p2, patch("xbmc.executebuiltin") as ebi:
+        keymap.sync(mode=1, button=2)  # Green
+        content = (tmp_path / "service.chapternotify.xml").read_text()
+        assert "<green>" in content
+        assert "<yellow>" not in content
+        ebi.assert_called_once_with("Action(reloadkeymaps)")
