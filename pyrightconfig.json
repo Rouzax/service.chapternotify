@@ -1,0 +1,5 @@
+{
+  "include": ["resources", "tests", "default.py", "service.py"],
+  "exclude": ["**/__pycache__", "**/.pytest_cache", "_temp", "docs"],
+  "extraPaths": ["."]
+}
