@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2026 Rouzax
-import os
-import tempfile
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from resources.lib import keymap
 
