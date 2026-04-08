@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 .Python
 *.so
+.pytest_cache/
 
 # IDE
 .vscode/
