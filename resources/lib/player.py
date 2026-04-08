@@ -139,3 +139,44 @@ class ChapterPlayer(xbmc.Player):
             except RuntimeError:
                 pass
             self._overlay = None
+
+    def _handle_manual_trigger(self):
+        """Read the trigger property; if fresh and unseen, call _on_manual_trigger.
+
+        Idempotent: ignores duplicate or stale timestamps. Always clears the
+        property after reading a non-empty value, so it never lingers.
+        """
+        win = xbmcgui.Window(10000)
+        raw = win.getProperty(TRIGGER_PROPERTY)
+        if not raw:
+            return
+
+        try:
+            ts_ms = int(raw)
+        except ValueError:
+            log.debug("Manual trigger: garbage value",
+                      event="manual.trigger.garbage", raw=raw)
+            win.clearProperty(TRIGGER_PROPERTY)
+            return
+
+        if ts_ms == self._last_trigger_ts:
+            return
+
+        now_ms = int(time.time() * 1000)
+        if now_ms - ts_ms > STALE_THRESHOLD_MS:
+            log.debug("Manual trigger: stale",
+                      event="manual.trigger.stale",
+                      age_ms=(now_ms - ts_ms))
+            self._last_trigger_ts = ts_ms
+            win.clearProperty(TRIGGER_PROPERTY)
+            return
+
+        log.debug("Manual trigger: received",
+                  event="manual.trigger.received", ts_ms=ts_ms)
+        self._last_trigger_ts = ts_ms
+        win.clearProperty(TRIGGER_PROPERTY)
+        self._on_manual_trigger()
+
+    def _on_manual_trigger(self):
+        """Real implementation added in Task 9."""
+        pass
