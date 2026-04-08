@@ -3,9 +3,17 @@
 import time
 import xbmc
 import xbmcaddon
-from resources.lib import log
+import xbmcgui
+from resources.lib import keymap, log
 from resources.lib.chapters import get_current_chapter, parse_chapter_name
 from resources.lib.overlay import create_chapter_overlay
+
+MODE_AUTO = 0
+MODE_MANUAL = 1
+MODE_BOTH = 2
+
+TRIGGER_PROPERTY = "chapternotify.trigger"
+STALE_THRESHOLD_MS = 3000
 
 
 class ChapterPlayer(xbmc.Player):
@@ -18,6 +26,34 @@ class ChapterPlayer(xbmc.Player):
         self._overlay = None
         self._overlay_show_time = 0
         self._duration = 5
+        self._trigger_mode = MODE_AUTO
+        self._trigger_button = 0
+        self._last_trigger_ts = 0
+        self._load_trigger_settings()
+        # Clear any stale trigger property from a previous session
+        try:
+            xbmcgui.Window(10000).clearProperty(TRIGGER_PROPERTY)
+        except Exception:
+            pass
+        keymap.sync(self._trigger_mode, self._trigger_button)
+
+    def _load_trigger_settings(self):
+        addon = xbmcaddon.Addon("service.chapternotify")
+        try:
+            self._trigger_mode = int(addon.getSetting("trigger_mode") or "0")
+        except ValueError:
+            self._trigger_mode = MODE_AUTO
+        try:
+            self._trigger_button = int(addon.getSetting("trigger_button") or "0")
+        except ValueError:
+            self._trigger_button = 0
+
+    def get_tick_interval_ms(self):
+        """Adaptive tick interval: 250ms in Manual/Both for responsive button trigger,
+        1000ms in Auto-only to minimize wakeups."""
+        if self._trigger_mode in (MODE_MANUAL, MODE_BOTH):
+            return 250
+        return 1000
 
     def onAVStarted(self):
         try:
