@@ -108,16 +108,20 @@ def create_chapter_overlay(parsed_name):
         is_top = position_key.startswith("top_")
         overlay.setProperty("animation", "slide_down" if is_top else "slide_up")
 
-    if parsed_name["artist"]:
-        overlay.setProperty("prefix_artist", "Track:")
-        overlay.setProperty("artist", parsed_name["track"])
-        overlay.setProperty("prefix_track", "Artist:")
-        overlay.setProperty("track", parsed_name["artist"])
-        if parsed_name["label"]:
+    show_label_setting = addon.getSetting("show_label") == "true"
+    layout = _decide_layout(parsed_name, show_label_setting)
+    overlay.setProperty("layout", layout)
+
+    if layout == "single":
+        overlay.setProperty("raw", parsed_name["raw"])
+    else:
+        overlay.setProperty("prefix_track", "Track:")
+        overlay.setProperty("track", parsed_name["track"])
+        overlay.setProperty("prefix_artist", "Artist:")
+        overlay.setProperty("artist", parsed_name["artist"])
+        if layout == "full":
             overlay.setProperty("prefix_label", "Label:")
             overlay.setProperty("label", parsed_name["label"])
-    else:
-        overlay.setProperty("artist", parsed_name["raw"])
 
     overlay.show()
     return overlay
