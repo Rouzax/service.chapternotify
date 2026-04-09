@@ -62,10 +62,16 @@ class _FakeWindow:
 
 
 class _FakeWindowXMLDialog:
-    """Stub for xbmcgui.WindowXMLDialog so addon dialog classes can subclass it."""
+    """Stub for xbmcgui.WindowXMLDialog so addon dialog classes can subclass it.
+
+    Stores properties in an instance dict so tests can assert what the
+    overlay code wrote. The real Kodi class stores window properties
+    on the dialog's backing window; this dict-backed version is a
+    reasonable test approximation.
+    """
 
     def __init__(self, *args, **kwargs):
-        pass
+        self._properties = {}
 
     def show(self):
         pass
@@ -74,10 +80,10 @@ class _FakeWindowXMLDialog:
         pass
 
     def setProperty(self, key, value):
-        pass
+        self._properties[key] = value
 
     def getProperty(self, key):
-        return ""
+        return self._properties.get(key, "")
 
 
 # xbmc

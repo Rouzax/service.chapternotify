@@ -26,3 +26,11 @@ def test_harness_imports():
 
     # translatePath is a pass-through (no hidden rewrites)
     assert xbmcvfs.translatePath("special://userdata/keymaps/") == "special://userdata/keymaps/"
+
+    # WindowXMLDialog stub gives functional property storage
+    dlg = xbmcgui.WindowXMLDialog()
+    dlg.setProperty("layout", "full")
+    assert dlg.getProperty("layout") == "full"
+    dlg.setProperty("track", "Ocean")
+    assert dlg.getProperty("track") == "Ocean"
+    assert dlg.getProperty("missing") == ""
