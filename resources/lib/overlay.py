@@ -36,6 +36,24 @@ class ChapterOverlay(xbmcgui.WindowXMLDialog):
         self.close()
 
 
+def _decide_layout(parsed_name, show_label_setting):
+    """Return 'full', 'medium', or 'single' based on parser result + setting.
+
+    - 'single': parser did not match the festival format; show the raw name only.
+    - 'full': parser matched AND the user wants the label AND the chapter
+      name actually included a [Label] tag.
+    - 'medium': parser matched but either the user disabled the label or
+      there was no [Label] tag to show.
+    """
+    has_parsed = bool(parsed_name["artist"])
+    if not has_parsed:
+        return "single"
+    has_label_text = bool(parsed_name["label"])
+    if show_label_setting and has_label_text:
+        return "full"
+    return "medium"
+
+
 def _get_position_key(setting_value):
     positions = {
         0: "bottom_center",
