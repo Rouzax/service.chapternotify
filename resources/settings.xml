@@ -143,6 +143,11 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="show_label" type="boolean" label="32020" help="32060">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="test_overlay" type="action" label="32019" help="32058">
                     <level>0</level>
                     <data>RunScript(service.chapternotify,test_overlay)</data>

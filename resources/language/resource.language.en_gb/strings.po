@@ -88,6 +88,10 @@ msgctxt "#32019"
 msgid "Test overlay"
 msgstr ""
 
+msgctxt "#32020"
+msgid "Show record label"
+msgstr ""
+
 
 # =============================================================================
 # Option Labels (32030-32049)
@@ -187,6 +191,10 @@ msgstr ""
 
 msgctxt "#32059"
 msgid "Color theme for the notification border and accents"
+msgstr ""
+
+msgctxt "#32060"
+msgid "Show the record label line when the chapter name includes a [Label] tag. When off, the overlay shrinks to a 2-line layout."
 msgstr ""
 
 msgctxt "#32100"
