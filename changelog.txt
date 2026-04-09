@@ -1,6 +1,45 @@
 Chapter Notify Changelog
 ========================
 
+v0.7.0 (2026-04-09)
+--------------------------
+New Features:
+  - Adaptive overlay panel height. The dialog now picks one of three sizes
+    based on what it has to show:
+      * 150px (full): track + artist + record label, with accent separator
+      * 120px (medium): track + artist only, with accent separator
+      * 80px (single): one centered line for raw chapters that do not
+        match the "Artist - Track [Label]" festival format. No accent line.
+  - "Show record label" toggle in the Display > Overlay settings group.
+    Default on. When off, the overlay always uses the medium 120px layout
+    even when the chapter name has a [Label] tag.
+  - Raw chapter support. Chapters that do not match the festival parser
+    format now render as a clean centered single line instead of an
+    awkward 3-row layout with empty rows and an orphaned accent line.
+
+Bug Fixes:
+  - Fixed reversed track/artist labeling in the overlay. The top row used
+    to bind to the wrong window property due to a swap in Python that
+    cancelled an inverse swap in the XML. Both sides now agree: the top
+    row is "Track:" and the middle row is "Artist:". No visible behavior
+    change in v0.6.0 because the swaps cancelled out, but the property
+    names in the XML and Python now match what they actually carry.
+
+Internal:
+  - New _decide_layout helper in resources/lib/overlay.py decides which
+    of the three layouts to render based on parser output and the new
+    show_label setting. Pure function, fully unit tested.
+  - Six position groups (bottom_center, bottom_left, bottom_right,
+    top_center, top_left, top_right) in chapternotify.xml each contain
+    three visibility-gated sub-groups (full/medium/single) selected by
+    Window.Property(layout). Inner sub-group blocks are byte-identical
+    across all 6 positions; only the outer anchor differs.
+  - Pytest scaffolding extended: WindowXMLDialog stub in conftest.py now
+    stores window properties in an instance dict so tests can assert
+    which properties create_chapter_overlay sets. Two new test files
+    (test_overlay_layout.py, test_overlay_create.py) cover the layout
+    decision logic and the property bindings for each layout.
+
 v0.6.0 (2026-04-08)
 --------------------------
 New Features:
