@@ -5,7 +5,8 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 from resources.lib import keymap, log
-from resources.lib.chapters import get_current_chapter, parse_chapter_name
+from resources.lib.chapters import (get_current_chapter, parse_chapter_name,
+                                    read_mkv_chapter_names)
 from resources.lib.overlay import create_chapter_overlay
 
 MODE_AUTO = 0
@@ -23,12 +24,14 @@ class ChapterPlayer(xbmc.Player):
         super().__init__()
         self._active = False
         self._current_chapter = -1
+        self._playing_file = None
         self._overlay = None
         self._overlay_show_time = 0
         self._duration = 5
         self._trigger_mode = MODE_AUTO
         self._trigger_key = keymap.DEFAULT_KEY
         self._last_trigger_ts = 0
+        self._mkv_chapters = {}   # filepath -> {chapter_num: name}
         self._load_trigger_settings()
         # Clear any stale trigger property from a previous session
         try:
@@ -89,6 +92,7 @@ class ChapterPlayer(xbmc.Player):
         addon = xbmcaddon.Addon("service.chapternotify")
         self._duration = int(addon.getSetting("duration") or "5")
         self._current_chapter = -1
+        self._playing_file = filepath
         self._active = True
 
     def onPlayBackStopped(self):
@@ -128,12 +132,14 @@ class ChapterPlayer(xbmc.Player):
         chapter_num = chapter_info["chapter"]
         if chapter_num != self._current_chapter:
             self._current_chapter = chapter_num
-            parsed = parse_chapter_name(chapter_info["name"])
+            name = self._resolve_chapter_name(
+                chapter_num, self._playing_file, chapter_info["name"])
+            parsed = parse_chapter_name(name)
             log.info("Chapter changed",
                      event="chapter.change",
                      chapter=chapter_num,
                      total=chapter_info["count"],
-                     name=chapter_info["name"])
+                     name=name)
             self._dismiss_overlay()
             try:
                 self._overlay = create_chapter_overlay(parsed)
@@ -152,9 +158,31 @@ class ChapterPlayer(xbmc.Player):
                 return True
         return False
 
+    def _resolve_chapter_name(self, chapter_num, filepath, fallback):
+        """Return the best available chapter name for chapter_num.
+
+        Tries the MKV file's preferred-language ChapterDisplay string first
+        (cached per filepath), falling back to the Kodi InfoLabel value.
+        This matters because CrateDig MKVs store both an undetermined-language
+        entry (just the title, which Kodi returns) and an English-language
+        entry with the full 'Artist - Track [Label]' format.
+        """
+        if filepath:
+            if filepath not in self._mkv_chapters:
+                names = read_mkv_chapter_names(filepath)
+                self._mkv_chapters[filepath] = names
+                log.debug("MKV chapters loaded",
+                          event="mkv.chapters.loaded",
+                          count=len(names), file=filepath)
+            mkv_name = self._mkv_chapters.get(filepath, {}).get(chapter_num)
+            if mkv_name:
+                return mkv_name
+        return fallback
+
     def _deactivate(self):
         self._active = False
         self._current_chapter = -1
+        self._playing_file = None
         self._dismiss_overlay()
 
     def _dismiss_overlay(self):
@@ -239,7 +267,16 @@ class ChapterPlayer(xbmc.Player):
                 pass
             self._overlay = None
 
-        parsed = parse_chapter_name(chapter_info["name"])
+        try:
+            filepath = self.getPlayingFile()
+        except RuntimeError:
+            filepath = None
+        name = self._resolve_chapter_name(
+            chapter_info["chapter"], filepath, chapter_info["name"])
+        parsed = parse_chapter_name(name)
+        log.debug("Manual trigger: resolved name",
+                  event="manual.resolved",
+                  name=name, artist=parsed["artist"])
         log.info("Manual trigger: showing overlay",
                  event="manual.show",
                  chapter=chapter_info["chapter"])

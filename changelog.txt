@@ -1,6 +1,28 @@
 Chapter Notify Changelog
 ========================
 
+v0.7.1 (2026-04-14)
+--------------------------
+Bug Fixes:
+  - Fixed festival set overlays showing a single-line raw track title instead
+    of the formatted Artist / Track / Label layout. CrateDig-enriched MKV
+    files store two ChapterDisplay entries per chapter: an undetermined-
+    language entry with just the title (which Kodi returns via
+    Player.ChapterName) and an English-language entry with the full
+    "Artist - Track [Label]" string. Chapter Notify now reads the preferred-
+    language display string directly from the MKV file, falling back to
+    Kodi's InfoLabel only when the file cannot be read.
+
+Internal:
+  - New read_mkv_chapter_names(filepath) in resources/lib/chapters.py.
+    Reads the first 4 MiB via xbmcvfs, scans for the Chapters EBML element
+    (0x1043A770), and parses EditionEntry > ChapterAtom > ChapterDisplay
+    elements into {1-based index: display_string}. Language preference:
+    "en" -> "eng" -> "und" -> first available. Only processes .mkv files.
+  - New _resolve_chapter_name(chapter_num, filepath, fallback) in
+    ChapterPlayer. Lazily loads and caches MKV chapter names per filepath.
+    Used in both _poll_chapter_change and _on_manual_trigger.
+
 v0.7.0 (2026-04-09)
 --------------------------
 New Features:
