@@ -1,6 +1,23 @@
 Chapter Notify Changelog
 ========================
 
+v0.7.2~alpha1 (2026-04-15)
+--------------------------
+Internal (alpha - work in progress):
+  - Replaced ChapterDisplay EBML reader (v0.7.1) with Tags-section reader.
+    CrateDig stores track info in Tag blocks, not in multi-language
+    ChapterDisplay strings. New reader navigates via SeekHead to exact
+    file offsets for Chapters and Tags elements, working regardless of
+    where they appear in the file.
+  - Added SEEK_END fallback for platforms where absolute seeks beyond
+    4 GB are truncated to 32 bits (Amlogic/OSMC). Detects seek landing
+    at the wrong element by verifying the Tags element ID after seek.
+
+Known Issues:
+  - Full 3-line CrateDig overlay still not working. UID matching between
+    the Chapters section and Tags section returns no hits. Diagnostic
+    logging added to capture tag structure on next test run.
+
 v0.7.1 (2026-04-14)
 --------------------------
 Bug Fixes:

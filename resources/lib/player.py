@@ -6,7 +6,7 @@ import xbmcaddon
 import xbmcgui
 from resources.lib import keymap, log
 from resources.lib.chapters import (get_current_chapter, parse_chapter_name,
-                                    read_mkv_chapter_names)
+                                    read_mkv_chapter_tags)
 from resources.lib.overlay import create_chapter_overlay
 
 MODE_AUTO = 0
@@ -62,6 +62,8 @@ class ChapterPlayer(xbmc.Player):
             self._duration = int(addon.getSetting("duration") or "5")
         except ValueError:
             self._duration = 5
+        # Refresh debug log level in case the user toggled it
+        log.init()
         if (self._trigger_mode != old_mode) or (self._trigger_key != old_key):
             log.info("Trigger settings changed",
                      event="settings.trigger.change",
@@ -161,20 +163,26 @@ class ChapterPlayer(xbmc.Player):
     def _resolve_chapter_name(self, chapter_num, filepath, fallback):
         """Return the best available chapter name for chapter_num.
 
-        Tries the MKV file's preferred-language ChapterDisplay string first
-        (cached per filepath), falling back to the Kodi InfoLabel value.
-        This matters because CrateDig MKVs store both an undetermined-language
-        entry (just the title, which Kodi returns) and an English-language
-        entry with the full 'Artist - Track [Label]' format.
+        Queries the per-file cache (populated by read_mkv_chapter_tags) using
+        two strategies in order:
+          1. Integer key lookup: chapter index from UID matching (fast path).
+          2. String key lookup: TITLE-based fallback using the Kodi InfoLabel
+             value (fallback). CrateDig writes the track title as both the
+             chapter name and the TITLE SimpleTag, so they always match even
+             when TagChapterUID values do not line up with the Chapters UIDs.
         """
         if filepath:
             if filepath not in self._mkv_chapters:
-                names = read_mkv_chapter_names(filepath)
+                names = read_mkv_chapter_tags(filepath)
                 self._mkv_chapters[filepath] = names
-                log.debug("MKV chapters loaded",
-                          event="mkv.chapters.loaded",
-                          count=len(names), file=filepath)
-            mkv_name = self._mkv_chapters.get(filepath, {}).get(chapter_num)
+                # Count integer keys (UID-matched) vs string keys (title fallback)
+                by_uid = sum(1 for k in names if isinstance(k, int))
+                by_title = sum(1 for k in names if isinstance(k, str))
+                log.info("MKV chapters loaded",
+                         event="mkv.chapters.loaded",
+                         by_uid=by_uid, by_title=by_title, file=filepath)
+            cache = self._mkv_chapters.get(filepath, {})
+            mkv_name = (fallback and cache.get(fallback)) or cache.get(chapter_num)
             if mkv_name:
                 return mkv_name
         return fallback
@@ -267,10 +275,7 @@ class ChapterPlayer(xbmc.Player):
                 pass
             self._overlay = None
 
-        try:
-            filepath = self.getPlayingFile()
-        except RuntimeError:
-            filepath = None
+        filepath = xbmc.getInfoLabel("Player.FilenameAndPath") or self._playing_file or None
         name = self._resolve_chapter_name(
             chapter_info["chapter"], filepath, chapter_info["name"])
         parsed = parse_chapter_name(name)

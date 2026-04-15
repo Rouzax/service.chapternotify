@@ -42,14 +42,24 @@ class _FakePlayer:
 class _FakeWindow:
     """Stub for xbmcgui.Window with dict-backed property storage.
 
-    Real Kodi behavior: window properties are global per-Kodi-process.
-    This stub gives each Window(id) a fresh dict, which is a reasonable
-    test approximation since tests can construct one inline and inspect it.
+    Real Kodi behavior: Window(id) is a singleton per window_id - any two
+    calls with the same id return the same backing store. This stub matches
+    that behavior so tests that set a property on Window(10000) in one call
+    and read it from a separate Window(10000) call see the same value.
     """
 
+    _instances: dict = {}
+
+    def __new__(cls, window_id=0):
+        if window_id not in cls._instances:
+            instance = super().__new__(cls)
+            instance._window_id = window_id
+            instance._properties = {}
+            cls._instances[window_id] = instance
+        return cls._instances[window_id]
+
     def __init__(self, window_id=0):
-        self._window_id = window_id
-        self._properties = {}
+        pass  # already initialised in __new__
 
     def getProperty(self, key):
         return self._properties.get(key, "")
@@ -127,6 +137,7 @@ xbmcvfs.delete = MagicMock(return_value=True)
 @pytest.fixture(autouse=True)
 def _reset_kodi_mocks():
     """Reset cumulative mock state between tests."""
+    _FakeWindow._instances.clear()
     yield
     xbmc.executebuiltin.reset_mock()
     xbmc.log.reset_mock()
@@ -135,3 +146,4 @@ def _reset_kodi_mocks():
     xbmcvfs.exists.reset_mock()
     xbmcvfs.mkdirs.reset_mock()
     xbmcvfs.delete.reset_mock()
+    _FakeWindow._instances.clear()

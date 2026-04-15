@@ -47,8 +47,10 @@ if __name__ == "__main__":
             )
 
     elif action == "test_overlay":
+        from resources.lib import log
         from resources.lib.chapters import parse_chapter_name
         from resources.lib.overlay import create_chapter_overlay
+        log.init()
 
         parsed = parse_chapter_name("FISHER & AR/CO - Ocean [CATCH & RELEASE]")
         overlay = create_chapter_overlay(parsed)

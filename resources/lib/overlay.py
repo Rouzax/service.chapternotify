@@ -77,7 +77,7 @@ def create_chapter_overlay(parsed_name):
     addon_path = addon.getAddonInfo("path")
 
     position = int(addon.getSetting("position") or "0")
-    opacity = int(addon.getSetting("opacity") or "70")
+    opacity = min(100, max(0, int(addon.getSetting("opacity") or "70")))
     animation = int(addon.getSetting("animation") or "0")
     theme = int(addon.getSetting("theme") or "0")
     show_bg = addon.getSetting("show_background") == "true"
