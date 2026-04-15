@@ -1,22 +1,40 @@
 Chapter Notify Changelog
 ========================
 
-v0.7.2~alpha1 (2026-04-15)
+v0.7.2 (2026-04-15)
 --------------------------
-Internal (alpha - work in progress):
-  - Replaced ChapterDisplay EBML reader (v0.7.1) with Tags-section reader.
-    CrateDig stores track info in Tag blocks, not in multi-language
-    ChapterDisplay strings. New reader navigates via SeekHead to exact
-    file offsets for Chapters and Tags elements, working regardless of
-    where they appear in the file.
-  - Added SEEK_END fallback for platforms where absolute seeks beyond
-    4 GB are truncated to 32 bits (Amlogic/OSMC). Detects seek landing
-    at the wrong element by verifying the Tags element ID after seek.
+Bug Fixes:
+  - Fixed festival set overlays failing to show the full Artist / Track / Label
+    layout on CrateDig-enriched MKV files. The v0.7.1 ChapterDisplay reader
+    relied on a multi-language "en" entry that CrateDig does not consistently
+    write. The new reader targets the MKV Tags section directly, matching tags
+    by TITLE field against Player.ChapterName as the primary strategy, with
+    TagChapterUID-based UID matching as a secondary fallback.
+  - Fixed file handle leak in read_mkv_chapter_tags: xbmcvfs.File is now
+    closed in a try/finally block regardless of exception path.
+  - Fixed early exit on empty uid_to_idx that would skip Tags parsing even
+    when title-based fallback could still succeed.
+  - Fixed accent separator line disappearing in floating text mode. The
+    separator is now always visible when a parsed chapter is shown.
 
-Known Issues:
-  - Full 3-line CrateDig overlay still not working. UID matching between
-    the Chapters section and Tags section returns no hits. Diagnostic
-    logging added to capture tag structure on next test run.
+Improvements:
+  - Opacity setting clamped to 0-100 to prevent malformed bgcolor strings.
+  - Debug log level refreshed immediately when toggled in settings.
+
+Internal:
+  - MKV reader rewritten: Tags section parsed via SeekHead direct seek.
+    Builds uid_to_tags (TagChapterUID-matched) and title_map (TITLE-keyed
+    fallback) in a single pass.
+  - SEEK_END fallback for 32-bit seek platforms (Amlogic/OSMC) where absolute
+    seeks beyond 4 GB are silently truncated.
+  - read_mkv_chapter_tags returns a mixed-key dict: integer keys for UID-matched
+    chapters, string keys for title-based fallback.
+  - _resolve_chapter_name tries title string key first, then integer chapter
+    index key.
+  - FakeWindow in test conftest now shares state per window_id, matching Kodi
+    singleton behaviour.
+  - New tests/test_chapters.py: 20 tests covering parse_chapter_name,
+    _build_formatted_name, and _resolve_chapter_name.
 
 v0.7.1 (2026-04-14)
 --------------------------
