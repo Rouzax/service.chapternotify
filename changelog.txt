@@ -1,6 +1,35 @@
 Chapter Notify Changelog
 ========================
 
+v0.7.3 (2026-05-19)
+--------------------------
+Bug Fixes:
+  - Fixed CrateDig tag detection failing on mkvmerge-produced files where the
+    Chapters element is placed inline in the Segment header without a SeekHead
+    entry. The EBML parser now scans the header buffer as a fallback when the
+    SeekHead does not reference Chapters directly.
+  - Fixed secondary SeekHead chains not being followed. When the primary
+    SeekHead only references another SeekHead deeper in the file, the parser
+    now seeks to it and reads its entries.
+  - Fixed _ID_TARGET_CHAPTER_UID using the wrong EBML element ID (0x63C5
+    TagTrackUID instead of 0x63C4 TagChapterUID). UID-based chapter matching
+    was silently broken since introduction; only the title-based fallback was
+    functioning.
+
+Improvements:
+  - Tags-only files (no Chapters section found) now proceed with title-based
+    matching instead of returning an empty result.
+
+Internal:
+  - Extracted _parse_seekhead_entries helper from _find_seekhead_positions so
+    both primary and secondary SeekHead buffers share the same parsing logic.
+  - _find_seekhead_positions now returns a 4-tuple including seg_data_start
+    and a list of secondary SeekHead positions.
+  - Added _SEEKHEAD_ID_BYTES constant (0x114D9B74).
+  - New tests: _find_seekhead_positions with synthetic EBML buffers covering
+    direct SeekHead lookup, inline fallback scan, secondary SeekHead detection,
+    and empty SeekHead.
+
 v0.7.2 (2026-04-15)
 --------------------------
 Bug Fixes:
