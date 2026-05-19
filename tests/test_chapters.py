@@ -4,7 +4,11 @@
 """Tests for chapters.py parsing logic and player._resolve_chapter_name."""
 from unittest.mock import patch
 
-from resources.lib.chapters import parse_chapter_name, _build_formatted_name
+from resources.lib.chapters import (
+    parse_chapter_name, _build_formatted_name,
+    _find_seekhead_positions,
+    _CHAPTERS_ID_BYTES, _TAGS_ID_BYTES, _SEEKHEAD_ID_BYTES,
+)
 from resources.lib import player as player_mod
 
 
@@ -99,6 +103,99 @@ def test_build_missing_performer_returns_none():
 
 def test_build_empty_fields_returns_none():
     assert _build_formatted_name({}) is None
+
+
+# ---------------------------------------------------------------------------
+# _find_seekhead_positions
+# ---------------------------------------------------------------------------
+
+def _build_ebml_buf(seekhead_entries, inline_elements=None):
+    """Build a minimal EBML buffer with Segment, SeekHead, and optional inline elements.
+
+    seekhead_entries is a list of (id_bytes, seek_position) tuples.
+    inline_elements is a list of 4-byte element ID bytes to place after the SeekHead.
+    """
+    # EBML header (simplified)
+    ebml_header = bytes([
+        0x1A, 0x45, 0xDF, 0xA3,  # EBML ID
+        0x84,                      # size = 4
+        0x42, 0x86, 0x81, 0x01,   # DocType stub
+    ])
+
+    # Build SeekHead content
+    sh_content = bytearray()
+    for id_bytes, position in seekhead_entries:
+        # SeekID child
+        seek_id_child = bytes([0x53, 0xAB]) + bytes([0x80 | len(id_bytes)]) + id_bytes
+        # SeekPosition child (encode as 4-byte big-endian)
+        pos_bytes = position.to_bytes(4, "big")
+        seek_pos_child = bytes([0x53, 0xAC, 0x84]) + pos_bytes
+        # Seek element wrapping both children
+        seek_payload = seek_id_child + seek_pos_child
+        seek_elem = bytes([0x4D, 0xBB]) + bytes([0x80 | len(seek_payload)]) + seek_payload
+        sh_content.extend(seek_elem)
+
+    # SeekHead element
+    seekhead = bytes([0x11, 0x4D, 0x9B, 0x74])
+    sh_size = len(sh_content)
+    seekhead += bytes([0x80 | sh_size]) + bytes(sh_content)
+
+    # Inline elements (just ID + minimal size placeholder)
+    inline_data = bytearray()
+    for elem_id in (inline_elements or []):
+        inline_data.extend(elem_id)
+        inline_data.extend(bytes([0x80 | 0]))  # zero-size element
+
+    # Segment (unknown size)
+    seg_data = seekhead + bytes(inline_data)
+    segment = bytes([0x18, 0x53, 0x80, 0x67, 0xFF]) + seg_data
+
+    return bytearray(ebml_header + segment)
+
+
+def test_seekhead_finds_chapters_and_tags_directly():
+    """Standard layout: both Chapters and Tags in the primary SeekHead."""
+    buf = _build_ebml_buf([
+        (_CHAPTERS_ID_BYTES, 5000),
+        (_TAGS_ID_BYTES, 6000),
+    ])
+    ch_pos, tags_pos, seg_data_start, secondary = _find_seekhead_positions(buf)
+    assert ch_pos == seg_data_start + 5000
+    assert tags_pos == seg_data_start + 6000
+    assert secondary == []
+
+
+def test_seekhead_inline_fallback_finds_chapters():
+    """SeekHead only has Tags; Chapters is inline in the header buffer."""
+    buf = _build_ebml_buf(
+        [(_TAGS_ID_BYTES, 6000)],
+        inline_elements=[_CHAPTERS_ID_BYTES],
+    )
+    ch_pos, tags_pos, seg_data_start, secondary = _find_seekhead_positions(buf)
+    assert ch_pos is not None
+    assert tags_pos == seg_data_start + 6000
+
+
+def test_seekhead_detects_secondary_seekheads():
+    """SeekHead references a secondary SeekHead."""
+    buf = _build_ebml_buf([
+        (_SEEKHEAD_ID_BYTES, 90000),
+        (_TAGS_ID_BYTES, 91000),
+    ])
+    ch_pos, tags_pos, seg_data_start, secondary = _find_seekhead_positions(buf)
+    assert ch_pos is None
+    assert tags_pos == seg_data_start + 91000
+    assert len(secondary) == 1
+    assert secondary[0] == seg_data_start + 90000
+
+
+def test_seekhead_returns_none_when_empty():
+    """SeekHead with no entries returns None for both positions."""
+    buf = _build_ebml_buf([])
+    ch_pos, tags_pos, _, secondary = _find_seekhead_positions(buf)
+    assert ch_pos is None
+    assert tags_pos is None
+    assert secondary == []
 
 
 # ---------------------------------------------------------------------------

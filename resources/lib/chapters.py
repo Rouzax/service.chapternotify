@@ -80,14 +80,15 @@ _ID_CHAPTER_UID = 0x73C4    # 2-byte: ChapterUID inside ChapterAtom
 # Element IDs for Tags parsing
 _ID_TAG                = 0x7373  # 2-byte: Tag block
 _ID_TARGETS            = 0x63C0  # 2-byte: Targets inside Tag
-_ID_TARGET_CHAPTER_UID = 0x63C5  # 2-byte: TagChapterUID inside Targets
+_ID_TARGET_CHAPTER_UID = 0x63C4  # 2-byte: TagChapterUID inside Targets
 _ID_SIMPLE_TAG         = 0x67C8  # 2-byte: SimpleTag
 _ID_TAG_NAME           = 0x45A3  # 2-byte: TagName
 _ID_TAG_STRING         = 0x4487  # 2-byte: TagString
 
 # 4-byte element IDs as raw bytes (for SeekID comparisons)
-_CHAPTERS_ID_BYTES = bytes([0x10, 0x43, 0xA7, 0x70])
-_TAGS_ID_BYTES     = bytes([0x12, 0x54, 0xC3, 0x67])
+_CHAPTERS_ID_BYTES  = bytes([0x10, 0x43, 0xA7, 0x70])
+_TAGS_ID_BYTES      = bytes([0x12, 0x54, 0xC3, 0x67])
+_SEEKHEAD_ID_BYTES  = bytes([0x11, 0x4D, 0x9B, 0x74])
 
 
 def _ebml_id(b, p):
@@ -157,41 +158,19 @@ def _read_uint(buf, start, end):
     return v
 
 
-def _find_seekhead_positions(buf):
-    """Parse the Segment SeekHead to find absolute file positions of Chapters and Tags.
+def _parse_seekhead_entries(buf, start, end, seg_data_start):
+    """Parse Seek entries from a SeekHead content region.
 
-    Returns (chapters_pos, tags_pos) as absolute byte offsets into the file.
-    Either value is None if not found.
+    Returns (chapters_pos, tags_pos, secondary_seekheads) where positions
+    are absolute file offsets and secondary_seekheads lists absolute offsets
+    to additional SeekHead elements.
     """
-    buf_bytes = bytes(buf)
-
-    # Find the Segment element - its data start is the base for SeekPosition values
-    seg_needle = bytes([0x18, 0x53, 0x80, 0x67])
-    seg_idx = buf_bytes.find(seg_needle)
-    if seg_idx == -1:
-        return None, None
-    pos = seg_idx + 4
-    seg_sz, seg_w = _ebml_sz(buf, pos)
-    if seg_sz is None:
-        return None, None
-    seg_data_start = seg_idx + 4 + seg_w
-
-    # Find SeekHead - always the first or second element in the Segment
-    sh_needle = bytes([0x11, 0x4D, 0x9B, 0x74])
-    sh_idx = buf_bytes.find(sh_needle, seg_data_start, min(len(buf), seg_data_start + 8192))
-    if sh_idx == -1:
-        return None, None
-    pos = sh_idx + 4
-    sh_sz, sh_w = _ebml_sz(buf, pos)
-    if sh_sz is None or sh_sz < 0:
-        return None, None
-    pos += sh_w
-    sh_end = min(pos + sh_sz, len(buf))
-
     chapters_pos = None
     tags_pos = None
+    secondary = []
+    pos = start
 
-    while pos < sh_end:
+    while pos < end:
         eid, ew = _ebml_id(buf, pos)
         if not ew:
             break
@@ -202,7 +181,7 @@ def _find_seekhead_positions(buf):
         pos += ew2
         if esz < 0:
             break
-        eend = min(pos + esz, sh_end)
+        eend = min(pos + esz, end)
 
         if eid == _ID_SEEK:
             seek_id_bytes = None
@@ -232,10 +211,63 @@ def _find_seekhead_positions(buf):
                     chapters_pos = abs_pos
                 elif seek_id_bytes == _TAGS_ID_BYTES:
                     tags_pos = abs_pos
+                elif seek_id_bytes == _SEEKHEAD_ID_BYTES:
+                    secondary.append(abs_pos)
 
         pos = eend
 
-    return chapters_pos, tags_pos
+    return chapters_pos, tags_pos, secondary
+
+
+def _find_seekhead_positions(buf):
+    """Parse the Segment SeekHead to find absolute file positions of Chapters and Tags.
+
+    Returns (chapters_pos, tags_pos, seg_data_start, secondary_seekheads).
+    chapters_pos and tags_pos are absolute byte offsets, or None.
+    seg_data_start is needed for parsing secondary SeekHeads.
+    secondary_seekheads lists absolute offsets to additional SeekHead elements.
+    """
+    buf_bytes = bytes(buf)
+
+    # Find the Segment element - its data start is the base for SeekPosition values
+    seg_needle = bytes([0x18, 0x53, 0x80, 0x67])
+    seg_idx = buf_bytes.find(seg_needle)
+    if seg_idx == -1:
+        return None, None, 0, []
+    pos = seg_idx + 4
+    seg_sz, seg_w = _ebml_sz(buf, pos)
+    if seg_sz is None:
+        return None, None, 0, []
+    seg_data_start = seg_idx + 4 + seg_w
+
+    # Find SeekHead - always the first or second element in the Segment
+    sh_idx = buf_bytes.find(_SEEKHEAD_ID_BYTES, seg_data_start,
+                            min(len(buf), seg_data_start + 8192))
+    if sh_idx == -1:
+        return None, None, seg_data_start, []
+    pos = sh_idx + 4
+    sh_sz, sh_w = _ebml_sz(buf, pos)
+    if sh_sz is None or sh_sz < 0:
+        return None, None, seg_data_start, []
+    pos += sh_w
+    sh_end = min(pos + sh_sz, len(buf))
+
+    chapters_pos, tags_pos, secondary = _parse_seekhead_entries(
+        buf, pos, sh_end, seg_data_start)
+
+    # Inline fallback: mkvmerge sometimes places Chapters directly in the
+    # Segment (right after the SeekHead) without referencing them from the
+    # SeekHead. Scan the remaining header buffer for those elements.
+    if chapters_pos is None:
+        idx = buf_bytes.find(_CHAPTERS_ID_BYTES, sh_end)
+        if idx >= 0:
+            chapters_pos = idx
+    if tags_pos is None:
+        idx = buf_bytes.find(_TAGS_ID_BYTES, sh_end)
+        if idx >= 0:
+            tags_pos = idx
+
+    return chapters_pos, tags_pos, seg_data_start, secondary
 
 
 def _parse_chapters_from_buf(buf):
@@ -523,28 +555,54 @@ def read_mkv_chapter_tags(filepath):
                       event="mkv.tags.hdr.empty", file=filepath)
             return {}
 
-        ch_pos, tags_pos = _find_seekhead_positions(hdr)
+        ch_pos, tags_pos, seg_data_start, secondary_sh = _find_seekhead_positions(hdr)
         log.info("MKV tags: SeekHead parsed",
                  event="mkv.tags.seekhead",
-                 ch_pos=ch_pos, tags_pos=tags_pos, file=filepath)
+                 ch_pos=ch_pos, tags_pos=tags_pos,
+                 secondary=len(secondary_sh), file=filepath)
 
-        if ch_pos is None or tags_pos is None:
-            log.debug("MKV tags: Chapters or Tags not found in SeekHead",
+        # Follow secondary SeekHeads if either position is still missing
+        if (ch_pos is None or tags_pos is None) and secondary_sh:
+            for sh_pos in secondary_sh:
+                fh.seek(sh_pos, 0)
+                sh_buf = _to_buf(_read(fh, 65536))
+                if not sh_buf or len(sh_buf) < 5:
+                    continue
+                if bytes(sh_buf[:4]) != _SEEKHEAD_ID_BYTES:
+                    continue
+                sp = 4
+                sh2_sz, sh2_w = _ebml_sz(sh_buf, sp)
+                if sh2_sz is None or sh2_sz < 0:
+                    continue
+                sp += sh2_w
+                sh2_end = min(sp + sh2_sz, len(sh_buf))
+                sh2_ch, sh2_tags, _ = _parse_seekhead_entries(
+                    sh_buf, sp, sh2_end, seg_data_start)
+                if ch_pos is None and sh2_ch is not None:
+                    ch_pos = sh2_ch
+                if tags_pos is None and sh2_tags is not None:
+                    tags_pos = sh2_tags
+                if ch_pos is not None and tags_pos is not None:
+                    break
+            log.info("MKV tags: after secondary SeekHead",
+                     event="mkv.tags.seekhead2",
+                     ch_pos=ch_pos, tags_pos=tags_pos, file=filepath)
+
+        if tags_pos is None:
+            log.debug("MKV tags: Tags not found",
                       event="mkv.tags.seekhead.miss", file=filepath)
             return {}
 
-        # Read and parse Chapters section
-        fh.seek(ch_pos, 0)
-        ch_buf = _to_buf(_read(fh, 512 * 1024))
-        if not ch_buf:
-            log.debug("MKV tags: Chapters read empty",
-                      event="mkv.tags.ch.empty", file=filepath)
-            return {}
+        # Read and parse Chapters section (optional; UID matching needs it
+        # but title-based fallback works without it)
+        uid_to_idx = {}
+        if ch_pos is not None:
+            fh.seek(ch_pos, 0)
+            ch_buf = _to_buf(_read(fh, 512 * 1024))
+            if ch_buf:
+                uid_to_idx = _parse_chapters_from_buf(ch_buf)
 
-        uid_to_idx = _parse_chapters_from_buf(ch_buf)
         if not uid_to_idx:
-            # No chapter UIDs in Chapters section. Title fallback can still work
-            # via the Tags section, so continue rather than returning early.
             log.debug("MKV tags: no chapter UIDs found, title fallback only",
                       event="mkv.tags.chapters.empty", file=filepath)
         else:
