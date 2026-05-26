@@ -1,6 +1,19 @@
 Chapter Notify Changelog
 ========================
 
+v0.7.4 (2026-05-26)
+--------------------------
+Improvements:
+  - MKV tag reader now prefers CRATEDIGGER_TRACK_TITLE over legacy TITLE when
+    reading per-chapter tags, matching the CrateDigger rename that prevents
+    VLC/MediaInfo from flattening the last chapter title into the file-level
+    display. Falls back to TITLE for older CrateDigger files.
+
+Internal:
+  - Updated _build_formatted_name and title_map builder to use the same
+    prefixed-with-fallback pattern already used for PERFORMER and LABEL.
+  - New test_build_legacy_title_fallback test covering the TITLE fallback path.
+
 v0.7.3 (2026-05-19)
 --------------------------
 Bug Fixes:
