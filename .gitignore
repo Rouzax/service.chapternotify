@@ -34,3 +34,6 @@ CLAUDE.md
 .claudeignore
 .mcp.json
 .worktrees/
+
+# Local dev notes
+TODO.md

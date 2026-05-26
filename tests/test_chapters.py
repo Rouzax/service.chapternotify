@@ -71,7 +71,7 @@ def test_parse_id_id():
 def test_build_full_with_prefixed_fields():
     fields = {
         "CRATEDIGGER_TRACK_PERFORMER": "FISHER",
-        "TITLE": "Ocean",
+        "CRATEDIGGER_TRACK_TITLE": "Ocean",
         "CRATEDIGGER_TRACK_LABEL": "CATCH & RELEASE",
     }
     assert _build_formatted_name(fields) == "FISHER - Ocean [CATCH & RELEASE]"
@@ -86,11 +86,21 @@ def test_build_prefers_prefixed_over_legacy():
     fields = {
         "PERFORMER": "Legacy Artist",
         "CRATEDIGGER_TRACK_PERFORMER": "Current Artist",
-        "TITLE": "Ocean",
+        "TITLE": "Legacy Title",
+        "CRATEDIGGER_TRACK_TITLE": "Current Title",
         "LABEL": "Old Label",
         "CRATEDIGGER_TRACK_LABEL": "New Label",
     }
-    assert _build_formatted_name(fields) == "Current Artist - Ocean [New Label]"
+    assert _build_formatted_name(fields) == "Current Artist - Current Title [New Label]"
+
+
+def test_build_legacy_title_fallback():
+    fields = {
+        "CRATEDIGGER_TRACK_PERFORMER": "FISHER",
+        "TITLE": "Ocean",
+        "CRATEDIGGER_TRACK_LABEL": "CATCH & RELEASE",
+    }
+    assert _build_formatted_name(fields) == "FISHER - Ocean [CATCH & RELEASE]"
 
 
 def test_build_missing_title_returns_none():

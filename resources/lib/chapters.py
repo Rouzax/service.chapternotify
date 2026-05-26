@@ -59,7 +59,8 @@ def parse_chapter_name(name):
 #
 # CrateDig stores track info as MKV Tags (TargetTypeValue=30) linked to
 # chapters via ChapterUID. The Tags section contains CRATEDIGGER_TRACK_PERFORMER
-# (or legacy PERFORMER), TITLE, and CRATEDIGGER_TRACK_LABEL (or legacy LABEL).
+# (or legacy PERFORMER), CRATEDIGGER_TRACK_TITLE (or legacy TITLE), and
+# CRATEDIGGER_TRACK_LABEL (or legacy LABEL).
 #
 # Strategy: read the first 64 KB, parse the SeekHead to get exact file offsets
 # for the Chapters and Tags elements, then seek to those positions and read
@@ -374,10 +375,11 @@ def _build_formatted_name(fields):
     """Build a 'PERFORMER - TITLE [LABEL]' string from a tag fields dict.
 
     Returns the formatted string if PERFORMER (or CRATEDIGGER_TRACK_PERFORMER)
-    and TITLE are both present, otherwise returns None.
+    and TITLE (or CRATEDIGGER_TRACK_TITLE) are both present, otherwise returns
+    None.
     """
     performer = fields.get("CRATEDIGGER_TRACK_PERFORMER") or fields.get("PERFORMER", "")
-    title = fields.get("TITLE", "")
+    title = fields.get("CRATEDIGGER_TRACK_TITLE") or fields.get("TITLE", "")
     label = fields.get("CRATEDIGGER_TRACK_LABEL") or fields.get("LABEL", "")
     if not (performer and title):
         return None
@@ -497,7 +499,7 @@ def _parse_tags_content(buf, start, end):
             # even when TagChapterUID doesn't match any chapter in uid_to_idx.
             formatted = _build_formatted_name(tag_fields)
             if formatted is not None:
-                title = tag_fields.get("TITLE", "")
+                title = tag_fields.get("CRATEDIGGER_TRACK_TITLE") or tag_fields.get("TITLE", "")
                 if title:
                     title_map[title] = formatted
 
